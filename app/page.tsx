@@ -207,41 +207,41 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="flex flex-col items-center gap-12 bg-default-100 -mx-6 px-6 py-16 md:-mx-[calc((100vw-1280px)/2)] md:px-[calc((100vw-1280px)/2)]">
+      <section className="flex flex-col items-center gap-12">
         <div className="text-center max-w-3xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-2xl md:text-xl font-bold mb-4">
             Simple, Yet Powerful
           </h2>
           <p className="text-xl text-default-600">
             Start tracking your trades in minutes
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
-          <div className="flex flex-col items-center text-center gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               1
             </div>
-            <h3 className="text-2xl font-bold">Connect Your Account</h3>
+            <h3 className="text-xl font-bold">Connect Your Account</h3>
             <p className="text-default-600">
               Link your broker or prop firm account to automatically import your
               trades.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center gap-4">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               2
             </div>
-            <h3 className="text-2xl font-bold">Review & Analyze</h3>
+            <h3 className="text-xl font-bold">Review & Analyze</h3>
             <p className="text-default-600">
               Add notes, tags, and context to your trades. Review your
               performance metrics.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center gap-4">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               3
             </div>
-            <h3 className="text-2xl font-bold">Improve & Grow</h3>
+            <h3 className="text-xl font-bold">Improve & Grow</h3>
             <p className="text-default-600">
               Use insights to refine your strategy and become a consistently
               profitable trader.
@@ -253,111 +253,97 @@ export default function Home() {
       {/* Trading Analytics Preview Section */}
       <section className="flex flex-col items-center gap-12">
         <div className="text-center max-w-3xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-2xl md:text-xl font-bold mb-4">
             Track What Matters
           </h2>
           <p className="text-xl text-default-600">
             Monitor your key performance indicators at a glance
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-6xl">
-          <Card className="p-6 text-center">
-            <CardBody>
-              <p className="text-sm text-default-600 mb-2">Win Rate</p>
-              <p className="text-4xl font-bold text-primary">67.5%</p>
-            </CardBody>
-          </Card>
-          <Card className="p-6 text-center">
-            <CardBody>
-              <p className="text-sm text-default-600 mb-2">Profit Factor</p>
-              <p className="text-4xl font-bold text-success">2.4</p>
-            </CardBody>
-          </Card>
-          <Card className="p-6 text-center">
-            <CardBody>
-              <p className="text-sm text-default-600 mb-2">Avg Win</p>
-              <p className="text-4xl font-bold text-success">$245</p>
-            </CardBody>
-          </Card>
-          <Card className="p-6 text-center">
-            <CardBody>
-              <p className="text-sm text-default-600 mb-2">Avg Loss</p>
-              <p className="text-4xl font-bold text-danger">-$102</p>
-            </CardBody>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-6xl">
+          <div className="p-8 text-center rounded-xl border border-divider bg-default-50">
+            <p className="text-sm text-default-600 mb-2">Win Rate</p>
+            <p className="text-4xl font-bold text-primary">67.5%</p>
+          </div>
+          <div className="p-8 text-center rounded-xl border border-divider bg-default-50">
+            <p className="text-sm text-default-600 mb-2">Profit Factor</p>
+            <p className="text-4xl font-bold text-success">2.4</p>
+          </div>
+          <div className="p-8 text-center rounded-xl border border-divider bg-default-50">
+            <p className="text-sm text-default-600 mb-2">Avg Win</p>
+            <p className="text-4xl font-bold text-success">$245</p>
+          </div>
+          <div className="p-8 text-center rounded-xl border border-divider bg-default-50">
+            <p className="text-sm text-default-600 mb-2">Avg Loss</p>
+            <p className="text-4xl font-bold text-danger">-$102</p>
+          </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
       <section className="flex flex-col items-center gap-12">
         <div className="text-center max-w-3xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-2xl md:text-xl font-bold mb-4">
             Loved by Traders Worldwide
           </h2>
           <p className="text-xl text-default-600">
             See what our users are saying about Vizion
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
-          <Card className="p-6">
-            <CardBody>
-              <p className="text-default-600 mb-4">
-                "Vizion transformed my trading. The analytics helped me identify
-                my mistakes and improve my win rate by 25%."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                  JD
-                </div>
-                <div>
-                  <p className="font-bold">John Doe</p>
-                  <p className="text-sm text-default-600">Day Trader</p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl">
+          <div className="p-8 rounded-xl border border-divider bg-default-50">
+            <p className="text-default-600 mb-6">
+              "Vizion transformed my trading. The analytics helped me identify
+              my mistakes and improve my win rate by 25%."
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                JD
               </div>
-            </CardBody>
-          </Card>
+              <div>
+                <p className="font-bold">John Doe</p>
+                <p className="text-sm text-default-600">Day Trader</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="p-6">
-            <CardBody>
-              <p className="text-default-600 mb-4">
-                "The auto-import feature saves me hours every week. I can focus
-                on trading instead of manual data entry."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                  SM
-                </div>
-                <div>
-                  <p className="font-bold">Sarah Miller</p>
-                  <p className="text-sm text-default-600">Forex Trader</p>
-                </div>
+          <div className="p-8 rounded-xl border border-divider bg-default-50">
+            <p className="text-default-600 mb-6">
+              "The auto-import feature saves me hours every week. I can focus on
+              trading instead of manual data entry."
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                SM
               </div>
-            </CardBody>
-          </Card>
+              <div>
+                <p className="font-bold">Sarah Miller</p>
+                <p className="text-sm text-default-600">Forex Trader</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="p-6">
-            <CardBody>
-              <p className="text-default-600 mb-4">
-                "Best trading journal I've used. Clean interface, powerful
-                analytics, and excellent support team."
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                  MJ
-                </div>
-                <div>
-                  <p className="font-bold">Michael Johnson</p>
-                  <p className="text-sm text-default-600">Prop Trader</p>
-                </div>
+          <div className="p-8 rounded-xl border border-divider bg-default-50">
+            <p className="text-default-600 mb-6">
+              "Best trading journal I've used. Clean interface, powerful
+              analytics, and excellent support team."
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                MJ
               </div>
-            </CardBody>
-          </Card>
+              <div>
+                <p className="font-bold">Michael Johnson</p>
+                <p className="text-sm text-default-600">Prop Trader</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="flex flex-col items-center gap-8 text-center bg-primary/10 -mx-6 px-6 py-16 rounded-3xl md:-mx-[calc((100vw-1280px)/2)] md:px-[calc((100vw-1280px)/2)]">
-        <h2 className="text-4xl md:text-5xl font-bold max-w-3xl">
+      <section className="flex flex-col items-center gap-8 text-center p-16 rounded-3xl border border-divider bg-default-50">
+        <h2 className="text-2xl md:text-xl font-bold max-w-3xl">
           Ready to Take Your Trading to the Next Level?
         </h2>
         <p className="text-xl text-default-600 max-w-2xl">
