@@ -1,69 +1,56 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Vizion",
+  description:
+    "Your professional trading journal to track and improve your trading performance.",
   navItems: [
     {
-      label: "Home",
-      href: "/",
-    },
-    {
-      label: "Docs",
-      href: "/docs",
+      label: "Features",
+      href: "/features",
     },
     {
       label: "Pricing",
       href: "/pricing",
     },
     {
-      label: "Blog",
-      href: "/blog",
+      label: "Supported Brokers",
+      href: "/supported-brokers",
     },
     {
-      label: "About",
-      href: "/about",
+      label: "Help",
+      href: "/help",
     },
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Features",
+      href: "/features",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Pricing",
+      href: "/pricing",
     },
     {
-      label: "Projects",
-      href: "/projects",
+      label: "Supported Brokers",
+      href: "/supported-brokers",
     },
     {
-      label: "Team",
-      href: "/team",
+      label: "Help",
+      href: "/help",
     },
     {
-      label: "Calendar",
-      href: "/calendar",
+      label: "Sign In",
+      href: "/signin",
     },
     {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
+      label: "Sign Up",
+      href: "/signup",
     },
   ],
   links: {
-    github: "https://github.com/heroui-inc/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
+    github: "https://github.com/khasey/vizion",
+    twitter: "https://twitter.com/vizion",
+    discord: "https://discord.gg/vizion",
   },
 };
