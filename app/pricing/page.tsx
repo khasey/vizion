@@ -14,11 +14,11 @@ export default function PricingPage() {
   const yearlyMonthlyEquivalent = (yearlyPrice / 12).toFixed(2);
 
   return (
-    <div className="flex flex-col gap-20 py-8 md:py-10">
+    <div className="flex flex-col gap-12 py-8 md:py-10 px-4">
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center gap-8 text-center">
+      <section className="flex flex-col items-center justify-center gap-4 text-center">
         <div className="max-w-6xl">
-          <p className="text-lg md:text-xl text-default-600">
+          <p className="text-base text-default-600">
             One plan with everything you need to become a better trader. No
             hidden fees, cancel anytime.
           </p>
@@ -26,10 +26,10 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Toggle */}
-      <section className="flex flex-col items-center gap-12">
-        <div className="flex items-center gap-4 p-2 rounded-2xl border border-divider bg-default-50">
+      <section className="flex flex-col items-center gap-8">
+        <div className="flex items-center gap-3 p-1.5 rounded-xl border border-divider bg-default-50">
           <span
-            className={`px-6 py-3 text-lg font-semibold transition-colors ${
+            className={`px-4 py-2 text-sm font-semibold transition-colors ${
               !isYearly ? "text-primary" : "text-default-600"
             }`}
           >
@@ -38,48 +38,48 @@ export default function PricingPage() {
           <Switch
             isSelected={isYearly}
             onValueChange={setIsYearly}
-            size="lg"
+            size="md"
             color="primary"
           />
           <span
-            className={`px-6 py-3 text-lg font-semibold transition-colors ${
+            className={`px-4 py-2 text-sm font-semibold transition-colors ${
               isYearly ? "text-primary" : "text-default-600"
             }`}
           >
             Yearly
-            <span className="ml-2 text-sm bg-primary/10 text-primary px-2 py-1 rounded-full">
+            <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
               Save 17%
             </span>
           </span>
         </div>
 
         {/* Pricing Card */}
-        <div className="w-full max-w-2xl">
-          <div className="relative p-12 rounded-3xl border-2 border-primary bg-default-50">
+        <div className="w-full max-w-3xl">
+          <div className="relative p-8 rounded-2xl border border-primary bg-default-50">
             {/* Most Popular Badge */}
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <div className="px-6 py-2 rounded-full bg-primary text-white text-sm font-semibold">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="px-4 py-1 rounded-full bg-primary text-white text-xs font-semibold">
                 Most Popular
               </div>
             </div>
 
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Vizion Pro</h2>
-              <div className="flex items-baseline justify-center gap-2 mb-4">
-                <span className="text-6xl font-bold text-primary">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold mb-3">Vizion Pro</h2>
+              <div className="flex items-baseline justify-center gap-2 mb-2">
+                <span className="text-4xl font-bold text-primary">
                   ${isYearly ? yearlyMonthlyEquivalent : monthlyPrice}
                 </span>
-                <span className="text-2xl text-default-600">/month</span>
+                <span className="text-lg text-default-600">/month</span>
               </div>
               {isYearly && (
-                <p className="text-default-600">
+                <p className="text-sm text-default-600">
                   Billed ${yearlyPrice} annually
                 </p>
               )}
             </div>
 
             {/* Features List */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-2.5 mb-6">
               {[
                 "Advanced Equity Curve Analysis",
                 "AI Market Direction Predictor",
@@ -96,12 +96,12 @@ export default function PricingPage() {
                 "API Access",
                 "Community Features",
               ].map((feature, index) => (
-                <div key={index} className="flex items-start gap-3">
+                <div key={index} className="flex items-start gap-2">
                   <Icon
                     icon="mdi:check-circle"
-                    className="text-success text-xl mt-0.5 flex-shrink-0"
+                    className="text-success text-base mt-0.5 flex-shrink-0"
                   />
-                  <span className="text-default-600">{feature}</span>
+                  <span className="text-sm text-default-600">{feature}</span>
                 </div>
               ))}
             </div>
@@ -110,14 +110,14 @@ export default function PricingPage() {
             <Button
               as={NextLink}
               href="/signup"
-              size="lg"
+              size="md"
               color="primary"
-              className="w-full font-semibold text-lg"
+              className="w-full font-semibold"
             >
               Start 14-Day Free Trial
             </Button>
 
-            <p className="text-center text-sm text-default-500 mt-4">
+            <p className="text-center text-xs text-default-500 mt-3">
               No credit card required • Cancel anytime
             </p>
           </div>
@@ -125,17 +125,15 @@ export default function PricingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="flex flex-col items-center gap-12">
+      <section className="flex flex-col items-center gap-8">
         <div className="text-center max-w-6xl">
-          <h2 className="text-2xl md:text-xl font-bold mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-xl text-default-600">
+          <h2 className="text-xl font-bold mb-2">Frequently Asked Questions</h2>
+          <p className="text-sm text-default-600">
             Got questions? We've got answers.
           </p>
         </div>
 
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             {
               question: "Can I cancel anytime?",
@@ -170,40 +168,38 @@ export default function PricingPage() {
           ].map((faq, index) => (
             <div
               key={index}
-              className="p-6 rounded-xl border border-divider bg-default-50"
+              className="p-4 rounded-xl border border-divider bg-default-50"
             >
-              <h3 className="text-lg font-bold mb-3">{faq.question}</h3>
-              <p className="text-default-600">{faq.answer}</p>
+              <h3 className="text-sm font-bold mb-2">{faq.question}</h3>
+              <p className="text-sm text-default-600">{faq.answer}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="flex flex-col items-center gap-8 text-center p-16 rounded-3xl border border-divider bg-default-50 max-w-6xl mx-auto">
-        <h2 className="text-2xl md:text-xl font-bold max-w-6xl">
-          Ready to Transform Your Trading?
-        </h2>
-        <p className="text-xl text-default-600 max-w-2xl">
+      <section className="flex flex-col items-center gap-6 text-center p-8 rounded-2xl border border-divider bg-default-50 max-w-6xl mx-auto">
+        <h2 className="text-xl font-bold">Ready to Transform Your Trading?</h2>
+        <p className="text-base text-default-600 max-w-2xl">
           Join thousands of traders who are using Vizion to track, analyze, and
           improve their performance.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button
             as={NextLink}
             href="/signup"
-            size="lg"
+            size="md"
             color="primary"
-            className="font-semibold text-lg px-8"
+            className="font-semibold"
           >
             Start Free Trial
           </Button>
           <Button
             as={NextLink}
             href="/features"
-            size="lg"
+            size="md"
             variant="bordered"
-            className="font-semibold text-lg px-8"
+            className="font-semibold"
           >
             Explore Features
           </Button>
