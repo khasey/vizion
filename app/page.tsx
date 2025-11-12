@@ -6,6 +6,8 @@ import { motion } from "motion/react";
 import NextLink from "next/link";
 import Image from "next/image";
 import { BentoDemo } from "@/components/bentoG";
+import { cn } from "@/lib/utils";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 export default function Home() {
   return (
@@ -148,8 +150,23 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="flex flex-col items-center gap-12">
-        <div className="text-center max-w-3xl">
+      <section className="relative flex flex-col items-center gap-12 py-16 overflow-hidden rounded-3xl">
+        {/* Grid Background */}
+        <div className="absolute -inset-20">
+          <div
+            className={cn(
+              "absolute inset-0",
+              "[background-size:40px_40px]",
+              "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",
+              "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+            )}
+          />
+          {/* Radial gradient for faded look */}
+          <div className="pointer-events-none absolute inset-0 bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_70%)] dark:bg-black"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 text-center max-w-3xl">
           <h2 className="text-2xl md:text-xl font-bold mb-4">
             Simple, Yet Powerful
           </h2>
@@ -157,8 +174,9 @@ export default function Home() {
             Start tracking your trades in minutes
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl">
-          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
+
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl px-4">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-white/50 dark:bg-black/50 backdrop-blur-sm">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               1
             </div>
@@ -168,7 +186,7 @@ export default function Home() {
               trades.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-white/50 dark:bg-black/50 backdrop-blur-sm">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               2
             </div>
@@ -178,7 +196,7 @@ export default function Home() {
               performance metrics.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-default-50">
+          <div className="flex flex-col items-center text-center gap-4 p-8 rounded-xl border border-divider bg-white/50 dark:bg-black/50 backdrop-blur-sm">
             <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
               3
             </div>
@@ -202,88 +220,103 @@ export default function Home() {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-6xl">
-          <div className="p-8 rounded-xl border border-divider bg-default-50">
-            <p className="text-default-600 mb-6">
-              "Vizion transformed my trading. The analytics helped me identify
-              my mistakes and improve my win rate by 25%."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                JD
-              </div>
-              <div>
-                <p className="font-bold">John Doe</p>
-                <p className="text-sm text-default-600">Day Trader</p>
+          {[
+            {
+              quote:
+                "Vizion transformed my trading. The analytics helped me identify my mistakes and improve my win rate by 25%.",
+              initials: "JD",
+              name: "John Doe",
+              role: "Day Trader",
+            },
+            {
+              quote:
+                "The auto-import feature saves me hours every week. I can focus on trading instead of manual data entry.",
+              initials: "SM",
+              name: "Sarah Miller",
+              role: "Forex Trader",
+            },
+            {
+              quote:
+                "Best trading journal I've used. Clean interface, powerful analytics, and excellent support team.",
+              initials: "MJ",
+              name: "Michael Johnson",
+              role: "Prop Trader",
+            },
+          ].map((testimonial, index) => (
+            <div key={index} className="relative min-h-[250px]">
+              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="relative flex h-full flex-col gap-6 overflow-hidden rounded-xl p-8 bg-white dark:bg-black border border-divider">
+                  <p className="text-default-600 flex-1">{testimonial.quote}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                      {testimonial.initials}
+                    </div>
+                    <div>
+                      <p className="font-bold">{testimonial.name}</p>
+                      <p className="text-sm text-default-600">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="p-8 rounded-xl border border-divider bg-default-50">
-            <p className="text-default-600 mb-6">
-              "The auto-import feature saves me hours every week. I can focus on
-              trading instead of manual data entry."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                SM
-              </div>
-              <div>
-                <p className="font-bold">Sarah Miller</p>
-                <p className="text-sm text-default-600">Forex Trader</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-8 rounded-xl border border-divider bg-default-50">
-            <p className="text-default-600 mb-6">
-              "Best trading journal I've used. Clean interface, powerful
-              analytics, and excellent support team."
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                MJ
-              </div>
-              <div>
-                <p className="font-bold">Michael Johnson</p>
-                <p className="text-sm text-default-600">Prop Trader</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="flex flex-col items-center gap-8 text-center p-16 rounded-3xl border border-divider bg-default-50">
-        <h2 className="text-2xl md:text-xl font-bold max-w-3xl">
-          Ready to Take Your Trading to the Next Level?
-        </h2>
-        <p className="text-xl text-default-600 max-w-2xl">
-          Join thousands of traders who are already using Vizion to improve
-          their performance.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button
-            as={NextLink}
-            href="/signup"
-            size="lg"
-            color="primary"
-            className="font-semibold text-lg px-8"
-          >
-            Start Your Free Trial
-          </Button>
-          <Button
-            as={NextLink}
-            href="/pricing"
-            size="lg"
-            variant="bordered"
-            className="font-semibold text-lg px-8"
-          >
-            View Pricing
-          </Button>
+      <section className="w-full max-w-6xl mx-auto">
+        <div className="relative min-h-[350px]">
+          <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+            <GlowingEffect
+              spread={40}
+              glow={true}
+              disabled={false}
+              proximity={64}
+              inactiveZone={0.01}
+            />
+            <div className="relative flex h-full flex-col items-center gap-8 text-center overflow-hidden rounded-xl p-16 bg-gradient-to-br from-primary/5 to-transparent border border-divider">
+              <h2 className="text-2xl md:text-xl font-bold max-w-3xl">
+                Ready to Take Your Trading to the Next Level?
+              </h2>
+              <p className="text-xl text-default-600 max-w-2xl">
+                Join thousands of traders who are already using Vizion to
+                improve their performance.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  as={NextLink}
+                  href="/signup"
+                  size="lg"
+                  color="primary"
+                  className="font-semibold text-lg px-8"
+                >
+                  Start Your Free Trial
+                </Button>
+                <Button
+                  as={NextLink}
+                  href="/pricing"
+                  size="lg"
+                  variant="bordered"
+                  className="font-semibold text-lg px-8"
+                >
+                  View Pricing
+                </Button>
+              </div>
+              <p className="text-sm text-default-500">
+                No credit card required • 14-day free trial • Cancel anytime
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-default-500">
-          No credit card required • 14-day free trial • Cancel anytime
-        </p>
       </section>
     </div>
   );
