@@ -13,7 +13,7 @@ const IconWrapper = ({ icon }: { icon: string }) => {
 
 export function BentoDemo() {
   return (
-    <BentoGrid className="lg:grid-rows-3">
+    <BentoGrid className="lg:grid-rows-[repeat(3,minmax(15rem,auto))] lg:auto-rows-auto">
       <BentoCard
         Icon={() => <IconWrapper icon="mdi:earth" />}
         name="Global Trading Network"
@@ -25,7 +25,7 @@ export function BentoDemo() {
             <DotMap />
           </div>
         }
-        className="lg:col-start-1 lg:col-end-3 lg:row-start-1 lg:row-end-3"
+        className="lg:col-start-1 lg:col-end-3 lg:row-start-1 lg:row-end-3 min-h-[500px]"
       />
       <BentoCard
         Icon={() => <IconWrapper icon="mdi:cash-multiple" />}
@@ -38,7 +38,7 @@ export function BentoDemo() {
             <AnimatedListDemo />
           </div>
         }
-        className="lg:col-start-3 lg:col-end-4 lg:row-start-1 lg:row-end-3"
+        className="lg:col-start-3 lg:col-end-4 lg:row-start-1 lg:row-end-3 min-h-[500px]"
       />
       <BentoCard
         Icon={() => <IconWrapper icon="mdi:chart-line" />}
@@ -51,7 +51,7 @@ export function BentoDemo() {
             <OrbitingCirclesDemo />
           </div>
         }
-        className="lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4"
+        className="lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4 "
       />
       <BentoCard
         Icon={() => <IconWrapper icon="mdi:chart-box" />}
@@ -64,7 +64,7 @@ export function BentoDemo() {
             <span className="text-lg">Analytics Dashboard Preview</span>
           </div>
         }
-        className="lg:col-start-2 lg:col-end-4 lg:row-start-3 lg:row-end-4"
+        className="lg:col-start-2 lg:col-end-4 lg:row-start-3 lg:row-end-4 "
       />
     </BentoGrid>
   );
