@@ -217,7 +217,10 @@ export default function SupportedBrokersPage() {
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                   <div className="w-fit rounded-lg border border-gray-600 p-2">
-                    <Icon icon={broker.icon} className="text-2xl text-black dark:text-neutral-400" />
+                    <Icon
+                      icon={broker.icon}
+                      className="text-2xl text-black dark:text-neutral-400"
+                    />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold mb-2 text-black dark:text-white">

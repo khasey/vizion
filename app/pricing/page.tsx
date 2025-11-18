@@ -194,7 +194,10 @@ export default function PricingPage() {
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                   <div className="flex items-start gap-3">
                     <div className="w-fit rounded-lg border border-gray-600 p-2 flex-shrink-0">
-                      <Icon icon={faq.icon} className="text-xl text-black dark:text-neutral-400" />
+                      <Icon
+                        icon={faq.icon}
+                        className="text-xl text-black dark:text-neutral-400"
+                      />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-bold mb-2 text-black dark:text-white">
