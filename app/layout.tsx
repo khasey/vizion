@@ -29,8 +29,7 @@ export default function RootLayout({
           <div className="relative flex flex-col min-h-screen">
             {!isDashboard && <Navbar />}
             <main className={clsx(
-              "container mx-auto max-w-7xl flex-grow",
-              isDashboard ? "px-0 pt-0" : "pt-16 px-6"
+              isDashboard ? "w-full max-w-none flex-grow px-0 pt-0 min-w-0" : "container mx-auto max-w-7xl flex-grow pt-16 px-6"
             )}>
               {children}
             </main>

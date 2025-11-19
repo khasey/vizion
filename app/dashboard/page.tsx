@@ -216,12 +216,12 @@ export default function DashboardPage() {
                   </Button>
                   <Button
                     as={NextLink}
-                    href="/dashboard/reports"
+                    href="/dashboard/insights"
                     className="w-full justify-start"
                     variant="bordered"
                   >
-                    <Icon icon="mdi:file-export" className="text-xl" />
-                    Export Report
+                    <Icon icon="mdi:robot" className="text-xl" />
+                    View Insights
                   </Button>
                   <Button
                     as={NextLink}
