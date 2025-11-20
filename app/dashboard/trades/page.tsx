@@ -3,7 +3,11 @@
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
-import { MyTrade, readAllTrades, writeAllTrades } from "@/components/trades/helpers";
+import {
+  MyTrade,
+  readAllTrades,
+  writeAllTrades,
+} from "@/components/trades/helpers";
 import { Setup } from "@/components/analytics/types";
 
 function readSetupsFromStorage(): Setup[] {
@@ -77,27 +81,53 @@ export default function TradesPage() {
           </thead>
           <tbody className="divide-y">
             {trades.map((t) => (
-              <tr key={t.id} className="hover:bg-default-50 dark:hover:bg-default-900">
+              <tr
+                key={t.id}
+                className="hover:bg-default-50 dark:hover:bg-gray-900"
+              >
                 <td className="px-3 py-3 text-sm">{t.date}</td>
                 <td className="px-3 py-3 text-sm">{t.instrument ?? "-"}</td>
                 <td className="px-3 py-3 text-sm">{t.symbol}</td>
-                <td className={`px-3 py-3 text-sm font-semibold ${t.pnl >= 0 ? "text-success" : "text-danger"}`}>{t.pnl >= 0 ? "+" : ""}{t.pnl.toFixed(2)} €</td>
+                <td
+                  className={`px-3 py-3 text-sm font-semibold ${t.pnl >= 0 ? "text-success" : "text-danger"}`}
+                >
+                  {t.pnl >= 0 ? "+" : ""}
+                  {t.pnl.toFixed(2)} €
+                </td>
                 <td className="px-3 py-3 text-sm">
                   <select
-                    value={(editing[t.id]?.setupId ?? t.setupId) ?? ""}
-                    onChange={(e) => setEditing((prev) => ({ ...prev, [t.id]: { ...(prev[t.id] ?? {}), setupId: e.target.value } }))}
+                    value={editing[t.id]?.setupId ?? t.setupId ?? ""}
+                    onChange={(e) =>
+                      setEditing((prev) => ({
+                        ...prev,
+                        [t.id]: {
+                          ...(prev[t.id] ?? {}),
+                          setupId: e.target.value,
+                        },
+                      }))
+                    }
                     className="rounded-md border p-2 bg-transparent"
                   >
                     <option value="">None</option>
                     {setups.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
                     ))}
                   </select>
                 </td>
                 <td className="px-3 py-3 text-sm">
                   <select
-                    value={(editing[t.id]?.status ?? t.status) ?? "Long"}
-                    onChange={(e) => setEditing((prev) => ({ ...prev, [t.id]: { ...(prev[t.id] ?? {}), status: e.target.value as any } }))}
+                    value={editing[t.id]?.status ?? t.status ?? "Long"}
+                    onChange={(e) =>
+                      setEditing((prev) => ({
+                        ...prev,
+                        [t.id]: {
+                          ...(prev[t.id] ?? {}),
+                          status: e.target.value as any,
+                        },
+                      }))
+                    }
                     className="rounded-md border p-2 bg-transparent"
                   >
                     <option value="Long">Long</option>
@@ -106,8 +136,18 @@ export default function TradesPage() {
                 </td>
                 <td className="px-3 py-3 text-sm">
                   <div className="flex items-center gap-2">
-                    <button className="px-2 py-1 rounded-md border text-sm" onClick={() => saveTrade(t.id)}>Save</button>
-                    <button className="px-2 py-1 rounded-md border text-sm text-destructive" onClick={() => deleteTrade(t.id)}>Delete</button>
+                    <button
+                      className="px-2 py-1 rounded-md border text-sm"
+                      onClick={() => saveTrade(t.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="px-2 py-1 rounded-md border text-sm text-destructive"
+                      onClick={() => deleteTrade(t.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>

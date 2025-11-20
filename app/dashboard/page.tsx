@@ -153,7 +153,7 @@ export default function DashboardPage() {
                   ].map((trade, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between p-4 rounded-lg border border-divider hover:bg-default-50 dark:hover:bg-default-800 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border border-divider hover:bg-blue-50 dark:hover:bg-gray-900 transition-colors"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-lg bg-default-100 dark:bg-default-800 flex items-center justify-center">
