@@ -20,7 +20,6 @@ export default function FeaturesPage() {
       title: "Advanced Analytics",
       description:
         "Track your performance with detailed analytics, equity curves, and win rate statistics.",
-      gradient: "from-blue-500 to-cyan-500",
       features: [
         "Real-time equity curve tracking",
         "Win/loss ratio analysis",
@@ -33,7 +32,6 @@ export default function FeaturesPage() {
       title: "AI Market Predictor",
       description:
         "Leverage AI to predict market direction and optimize your trading strategies.",
-      gradient: "from-purple-500 to-pink-500",
       features: [
         "ML-powered predictions",
         "Pattern recognition",
@@ -46,7 +44,6 @@ export default function FeaturesPage() {
       title: "Risk Management",
       description:
         "Advanced tools to manage your risk, set stop losses, and protect your capital.",
-      gradient: "from-orange-500 to-red-500",
       features: [
         "Automated stop-loss alerts",
         "Position sizing calculator",
@@ -59,7 +56,6 @@ export default function FeaturesPage() {
       title: "Auto Trade Import",
       description:
         "Automatically import trades from your broker or prop firm account in real-time.",
-      gradient: "from-green-500 to-emerald-500",
       features: [
         "Real-time synchronization",
         "Multi-broker support",
@@ -72,7 +68,6 @@ export default function FeaturesPage() {
       title: "Custom Reports",
       description:
         "Generate detailed reports and export your trading data in multiple formats.",
-      gradient: "from-indigo-500 to-purple-500",
       features: ["PDF & Excel export", "Custom templates", "Scheduled reports"],
       status: "Available Now",
     },
@@ -81,7 +76,6 @@ export default function FeaturesPage() {
       title: "Economic Calendar",
       description:
         "Stay updated with economic events and their potential impact on your trades.",
-      gradient: "from-yellow-500 to-orange-500",
       features: [
         "Real-time event updates",
         "Impact level indicators",
@@ -129,9 +123,9 @@ export default function FeaturesPage() {
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                   <div
-                    className={`w-full h-20 rounded-lg bg-gradient-to-br ${feature.gradient} flex items-center justify-center`}
+                    className="w-full h-20 rounded-lg bg-secondary flex items-center justify-center"
                   >
-                    <Icon icon={feature.icon} className="text-4xl text-white" />
+                    <Icon icon={feature.icon} className="text-4xl text-primary" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold mb-2 text-black dark:text-white">
@@ -265,7 +259,7 @@ const GridItem = ({ area, icon, title, description }: GridItemProps) => {
         />
         <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider dark:shadow-[0px_0px_27px_0px_#2D2D2D]">
           <div className="relative flex flex-1 flex-col justify-between gap-3">
-            <div className="w-fit rounded-lg border border-gray-600 p-2">
+            <div className="w-fit rounded-lg bg-secondary p-2">
               {icon}
             </div>
             <div className="space-y-3">

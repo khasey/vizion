@@ -28,7 +28,6 @@ export default function HelpPage() {
         "Understanding the dashboard",
         "Importing your first trades",
       ],
-      color: "from-blue-500 to-cyan-500",
     },
     {
       icon: "mdi:connection",
@@ -40,7 +39,6 @@ export default function HelpPage() {
         "Auto-sync setup guide",
         "Manual trade import",
       ],
-      color: "from-green-500 to-emerald-500",
     },
     {
       icon: "mdi:chart-line",
@@ -52,7 +50,6 @@ export default function HelpPage() {
         "Profit factor explained",
         "Custom report generation",
       ],
-      color: "from-purple-500 to-pink-500",
     },
     {
       icon: "mdi:account-cog",
@@ -64,7 +61,6 @@ export default function HelpPage() {
         "Canceling subscription",
         "Data export and backup",
       ],
-      color: "from-orange-500 to-red-500",
     },
   ];
 
@@ -119,7 +115,6 @@ export default function HelpPage() {
       contact: "support@vizion.trading",
       actionText: "Send Email",
       href: "mailto:support@vizion.trading",
-      color: "from-blue-500 to-cyan-500",
     },
     {
       icon: "mdi:chat",
@@ -128,7 +123,6 @@ export default function HelpPage() {
       contact: "Available 9 AM - 6 PM EST",
       actionText: "Start Chat",
       href: "#",
-      color: "from-green-500 to-emerald-500",
     },
     {
       icon: "mdi:book-open",
@@ -137,7 +131,6 @@ export default function HelpPage() {
       contact: "Detailed tutorials & guides",
       actionText: "View Docs",
       href: "/docs",
-      color: "from-purple-500 to-pink-500",
     },
     {
       icon: "mdi:account-group",
@@ -146,7 +139,6 @@ export default function HelpPage() {
       contact: "Connect with traders",
       actionText: "Join Now",
       href: "#",
-      color: "from-orange-500 to-red-500",
     },
   ];
 
@@ -200,10 +192,10 @@ export default function HelpPage() {
                   inactiveZone={0.01}
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                  <div className="w-fit rounded-lg border border-gray-600 p-2">
+                  <div className="w-fit rounded-lg bg-secondary p-2">
                     <Icon
                       icon={category.icon}
-                      className="text-2xl text-default-700 dark:text-default-400"
+                      className="text-2xl text-primary"
                     />
                   </div>
                   <div>
@@ -292,10 +284,10 @@ export default function HelpPage() {
                   inactiveZone={0.01}
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                  <div className="w-fit rounded-lg border border-gray-600 p-2">
+                  <div className="w-fit rounded-lg bg-secondary p-2">
                     <Icon
                       icon={option.icon}
-                      className="text-2xl text-default-700 dark:text-default-400"
+                      className="text-2xl text-primary"
                     />
                   </div>
                   <div>
@@ -335,7 +327,7 @@ export default function HelpPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex h-full flex-col gap-6 overflow-hidden rounded-xl p-8 bg-gradient-to-br from-primary/5 to-transparent">
+            <div className="relative flex h-full flex-col gap-6 overflow-hidden rounded-xl p-8 bg-secondary border border-divider">
               <div className="text-center">
                 <h2 className="text-3xl font-bold mb-2">Video Tutorials</h2>
                 <p className="text-lg text-default-600">
@@ -379,12 +371,12 @@ export default function HelpPage() {
 
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto">
-        <Card className="bg-gradient-to-br from-primary via-primary to-primary/80 text-white border-0">
+        <Card className="bg-secondary border border-divider">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl md:text-4xl text-white">
+            <CardTitle className="text-3xl md:text-4xl text-foreground">
               Ready to Get Started?
             </CardTitle>
-            <CardDescription className="text-white/90 text-lg mt-2">
+            <CardDescription className="text-default-600 text-lg mt-2">
               Start your free trial today and experience the difference
             </CardDescription>
           </CardHeader>
@@ -393,7 +385,8 @@ export default function HelpPage() {
               as={NextLink}
               href="/signup"
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 font-semibold"
+              color="primary"
+              className="font-semibold"
             >
               Start Free Trial
             </Button>
@@ -402,7 +395,7 @@ export default function HelpPage() {
               href="/docs"
               size="lg"
               variant="bordered"
-              className="border-white text-white hover:bg-white/10 font-semibold"
+              className="font-semibold"
             >
               View Documentation
             </Button>

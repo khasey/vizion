@@ -24,7 +24,6 @@ export default function SupportedBrokersPage() {
         "80% profit split",
       ],
       status: "Fully Supported",
-      color: "from-blue-500 to-cyan-500",
     },
     {
       name: "TopstepTrader",
@@ -32,7 +31,6 @@ export default function SupportedBrokersPage() {
       description: "Futures trading evaluation program",
       features: ["Trading Combine", "Up to $150,000", "90% profit split"],
       status: "Fully Supported",
-      color: "from-green-500 to-emerald-500",
     },
     {
       name: "The5ers",
@@ -40,7 +38,6 @@ export default function SupportedBrokersPage() {
       description: "Forex-focused prop trading firm",
       features: ["Instant funding", "Up to $250,000", "Aggressive growth"],
       status: "Fully Supported",
-      color: "from-purple-500 to-pink-500",
     },
     {
       name: "MyForexFunds",
@@ -48,7 +45,6 @@ export default function SupportedBrokersPage() {
       description: "Fast-growing forex prop firm",
       features: ["1-step challenge", "Up to $300,000", "80% profit split"],
       status: "Fully Supported",
-      color: "from-orange-500 to-red-500",
     },
     {
       name: "Funded Next",
@@ -56,7 +52,6 @@ export default function SupportedBrokersPage() {
       description: "Modern prop firm with flexible options",
       features: ["Multiple challenges", "Up to $200,000", "90% profit split"],
       status: "Fully Supported",
-      color: "from-indigo-500 to-purple-500",
     },
     {
       name: "E8 Funding",
@@ -64,7 +59,6 @@ export default function SupportedBrokersPage() {
       description: "Rapid evaluation and funding",
       features: ["Express funding", "Up to $400,000", "80% profit split"],
       status: "Fully Supported",
-      color: "from-yellow-500 to-orange-500",
     },
     {
       name: "FunderPro",
@@ -72,7 +66,6 @@ export default function SupportedBrokersPage() {
       description: "Professional trading environment",
       features: ["2-phase challenge", "Up to $200,000", "80% profit split"],
       status: "Fully Supported",
-      color: "from-teal-500 to-cyan-500",
     },
     {
       name: "True Forex Funds",
@@ -80,7 +73,6 @@ export default function SupportedBrokersPage() {
       description: "Transparent and trader-friendly",
       features: ["Fair evaluation", "Up to $200,000", "80% profit split"],
       status: "Fully Supported",
-      color: "from-rose-500 to-pink-500",
     },
   ];
 
@@ -89,25 +81,21 @@ export default function SupportedBrokersPage() {
       name: "MetaTrader 4/5",
       icon: "mdi:chart-line",
       description: "Most popular forex trading platform",
-      color: "from-blue-500 to-indigo-500",
     },
     {
       name: "cTrader",
       icon: "mdi:chart-areaspline",
       description: "Advanced ECN trading platform",
-      color: "from-green-500 to-teal-500",
     },
     {
       name: "NinjaTrader",
       icon: "mdi:chart-box",
       description: "Futures and forex trading platform",
-      color: "from-purple-500 to-violet-500",
     },
     {
       name: "TradingView",
       icon: "mdi:chart-multiple",
       description: "Social charting and trading",
-      color: "from-cyan-500 to-blue-500",
     },
   ];
 
@@ -154,9 +142,9 @@ export default function SupportedBrokersPage() {
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                   <div
-                    className={`w-full h-20 rounded-lg bg-gradient-to-br ${firm.color} flex items-center justify-center`}
+                    className="w-full h-20 rounded-lg bg-secondary flex items-center justify-center"
                   >
-                    <div className="text-white text-xl font-bold">
+                    <div className="text-primary text-xl font-bold">
                       {firm.name}
                     </div>
                   </div>
@@ -216,10 +204,10 @@ export default function SupportedBrokersPage() {
                   inactiveZone={0.01}
                 />
                 <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                  <div className="w-fit rounded-lg border border-gray-600 p-2">
+                  <div className="w-fit rounded-lg bg-secondary p-2">
                     <Icon
                       icon={broker.icon}
-                      className="text-2xl text-black dark:text-neutral-400"
+                      className="text-2xl text-primary"
                     />
                   </div>
                   <div>
@@ -239,7 +227,7 @@ export default function SupportedBrokersPage() {
 
       {/* How to Connect Section */}
       <section className="w-full max-w-5xl mx-auto">
-        <Card className="bg-gradient-to-br from-primary/5 to-transparent border-2">
+        <Card className="bg-secondary border-2 border-divider">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl">How to Connect</CardTitle>
             <CardDescription className="text-lg">
@@ -282,12 +270,12 @@ export default function SupportedBrokersPage() {
 
       {/* CTA Section */}
       <section className="w-full max-w-4xl mx-auto">
-        <Card className="bg-gradient-to-br from-primary via-primary to-primary/80 text-white border-0">
+        <Card className="bg-secondary border border-divider">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl md:text-4xl text-white">
+            <CardTitle className="text-3xl md:text-4xl text-foreground">
               Don't See Your Platform?
             </CardTitle>
-            <CardDescription className="text-white/90 text-lg mt-2">
+            <CardDescription className="text-default-600 text-lg mt-2">
               We're constantly adding new integrations. Contact us to request
               support for your broker.
             </CardDescription>
@@ -297,7 +285,8 @@ export default function SupportedBrokersPage() {
               as={NextLink}
               href="/help"
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 font-semibold"
+              color="primary"
+              className="font-semibold"
             >
               Contact Support
             </Button>
@@ -306,7 +295,7 @@ export default function SupportedBrokersPage() {
               href="/signup"
               size="lg"
               variant="bordered"
-              className="border-white text-white hover:bg-white/10 font-semibold"
+              className="font-semibold"
             >
               Start Free Trial
             </Button>

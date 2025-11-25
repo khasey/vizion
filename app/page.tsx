@@ -70,13 +70,13 @@ export default function Home() {
           <motion.div
             className="flex gap-16 whitespace-nowrap"
             animate={{
-              x: [0, -1920], // Déplacement total
+              x: ["0%", "-50%"], // Déplacement en pourcentage pour fluidité parfaite
             }}
             transition={{
               x: {
                 repeat: Infinity,
                 repeatType: "loop",
-                duration: 100,
+                duration: 30, // Durée ajustée pour une vitesse agréable
                 ease: "linear",
               },
             }}
@@ -84,24 +84,21 @@ export default function Home() {
             {/* Premier set de logos */}
             {[
               { name: "FTMO", file: "FTMO.svg" },
-              { name: "TopstepTrader", file: "FTMO.svg" },
-              { name: "The5ers", file: "FTMO.svg" },
-              { name: "MyForexFunds", file: "FTMO.svg" },
-              { name: "Interactive Brokers", file: "FTMO.svg" },
-              { name: "TD Ameritrade", file: "FTMO.svg" },
-              { name: "MetaTrader", file: "FTMO.svg" },
-              { name: "NinjaTrader", file: "FTMO.svg" },
+              { name: "weGetFunded", file: "WGF.svg" },
+              { name: "apex", file: "apex.svg" },
+              { name: "topstep-logo", file: "topstep-logo.svg" },
+              { name : "phidias", file : "phidiaslogo.svg"}
             ].map((broker, index) => (
               <div
                 key={`first-${index}`}
-                className="flex items-center justify-center min-w-[200px] h-6"
+                className="flex items-center justify-center min-w-[200px] h-12"
               >
                 <Image
                   src={`/propFirm/${broker.file}`}
                   alt={broker.name}
                   width={120}
                   height={40}
-                  className="object-contain dark:invert"
+                  className="object-contain grayscale brightness-0 dark:invert opacity-70 hover:opacity-100 transition-opacity"
                 />
               </div>
             ))}
@@ -109,24 +106,21 @@ export default function Home() {
             {/* Duplication pour loop infini */}
             {[
               { name: "FTMO", file: "FTMO.svg" },
-              { name: "TopstepTrader", file: "FTMO.svg" },
-              { name: "The5ers", file: "FTMO.svg" },
-              { name: "MyForexFunds", file: "FTMO.svg" },
-              { name: "Interactive Brokers", file: "FTMO.svg" },
-              { name: "TD Ameritrade", file: "FTMO.svg" },
-              { name: "MetaTrader", file: "FTMO.svg" },
-              { name: "NinjaTrader", file: "FTMO.svg" },
+              { name: "weGetFunded", file: "WGF.svg" },
+              { name: "apex", file: "apex.svg" },
+              { name: "topstep-logo", file: "topstep-logo.svg" },
+              { name : "phidias", file : "phidiaslogo.svg"}
             ].map((broker, index) => (
               <div
                 key={`second-${index}`}
-                className="flex items-center justify-center min-w-[200px] h-6"
+                className="flex items-center justify-center min-w-[200px] h-12"
               >
                 <Image
                   src={`/propFirm/${broker.file}`}
                   alt={broker.name}
                   width={120}
                   height={40}
-                  className="object-contain dark:invert"
+                  className="object-contain grayscale brightness-0 dark:invert opacity-70 hover:opacity-100 transition-opacity"
                 />
               </div>
             ))}

@@ -43,7 +43,7 @@ export function OrbitingCircles({
             stroke="currentColor"
             strokeWidth="1"
             strokeDasharray="5 5"
-            className="text-default-300 dark:text-default-600"
+            className="text-primary/40"
           />
         </svg>
       )}

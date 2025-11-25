@@ -51,9 +51,9 @@ export default function DashboardLayout({
       href: "/dashboard/brokers",
     },
     {
-      title: "Settings",
-      icon: "mdi:cog",
-      href: "/dashboard/settings",
+      title: "Upload",
+      icon: "mdi:cloud-upload",
+      href: "/dashboard/upload",
     },
   ];
 
