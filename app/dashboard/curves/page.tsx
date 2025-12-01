@@ -1,9 +1,11 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@heroui/button";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { getTrades } from "@/app/actions/trades";
+import type { Trade } from "@/types/trades";
 import {
   LineChart,
   Line,
@@ -20,63 +22,223 @@ import {
 } from "recharts";
 
 export default function CurvesPage() {
-  const [timeRange, setTimeRange] = useState("1M");
+  const [timeRange, setTimeRange] = useState("day");
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Données simulées pour l'equity curve
-  const equityData = [
-    { date: "Jan 1", equity: 10000, balance: 10000 },
-    { date: "Jan 8", equity: 10350, balance: 10200 },
-    { date: "Jan 15", equity: 10800, balance: 10500 },
-    { date: "Jan 22", equity: 10650, balance: 10400 },
-    { date: "Jan 29", equity: 11200, balance: 10900 },
-    { date: "Feb 5", equity: 11500, balance: 11100 },
-    { date: "Feb 12", equity: 11350, balance: 11000 },
-    { date: "Feb 19", equity: 11800, balance: 11400 },
-    { date: "Feb 26", equity: 12200, balance: 11800 },
-    { date: "Mar 5", equity: 12450, balance: 12000 },
+  useEffect(() => {
+    async function fetchTrades() {
+      const result = await getTrades();
+      if (result.data) {
+        setTrades(result.data);
+      }
+      setLoading(false);
+    }
+    fetchTrades();
+  }, []);
+
+  // Filter trades based on timerange
+  const filteredTrades = useMemo(() => {
+    if (trades.length === 0) return [];
+
+    const now = new Date();
+    const cutoffDate = new Date();
+
+    switch (timeRange) {
+      case "day":
+        cutoffDate.setHours(0, 0, 0, 0);
+        break;
+      case "week":
+        cutoffDate.setDate(now.getDate() - 7);
+        break;
+      case "month":
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+      case "year":
+        cutoffDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        cutoffDate.setHours(0, 0, 0, 0);
+    }
+
+    return trades.filter(
+      (trade) => new Date(trade.trade_date) >= cutoffDate
+    );
+  }, [trades, timeRange]);
+
+  // Calculate equity curve from filtered trades
+  const equityData = useMemo(() => {
+    if (filteredTrades.length === 0) return [];
+
+    const STARTING_BALANCE = 0;
+    const sortedTrades = [...filteredTrades].sort(
+      (a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime()
+    );
+
+    // Get date format based on timerange
+    const getDateFormat = (date: Date) => {
+      if (timeRange === "day") {
+        // Hourly format for day
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else if (timeRange === "week" || timeRange === "month") {
+        // Daily format for week and month
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      } else {
+        // Monthly format for year
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        });
+      }
+    };
+
+    let runningEquity = STARTING_BALANCE;
+    const data = sortedTrades.map((trade) => {
+      runningEquity += trade.profit_loss;
+      return {
+        date: getDateFormat(new Date(trade.trade_date)),
+        equity: runningEquity,
+        balance: runningEquity,
+        fullDate: trade.trade_date,
+      };
+    });
+
+    // Aggregate data for monthly view if timeRange is year
+    if (timeRange === "year") {
+      const monthlyData = data.reduce((acc, point) => {
+        const monthKey = new Date(point.fullDate).toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        });
+        
+        if (!acc[monthKey]) {
+          acc[monthKey] = {
+            date: monthKey,
+            equity: point.equity,
+            balance: point.balance,
+            count: 1,
+          };
+        } else {
+          acc[monthKey].equity = point.equity; // Take last value of the month
+          acc[monthKey].balance = point.balance;
+          acc[monthKey].count++;
+        }
+        
+        return acc;
+      }, {} as Record<string, any>);
+
+      return [
+        { date: "Start", equity: STARTING_BALANCE, balance: STARTING_BALANCE },
+        ...Object.values(monthlyData),
+      ];
+    }
+
+    return [
+      { date: "Start", equity: STARTING_BALANCE, balance: STARTING_BALANCE },
+      ...data,
+    ];
+  }, [filteredTrades, timeRange]);
+
+  // Calculate PnL based on timerange
+  const pnlData = useMemo(() => {
+    if (filteredTrades.length === 0) return [];
+
+    const getDateKey = (date: Date) => {
+      if (timeRange === "day") {
+        // Hourly
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else if (timeRange === "week" || timeRange === "month") {
+        // Daily
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      } else {
+        // Monthly for year
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "numeric",
+        });
+      }
+    };
+
+    const pnlByPeriod = filteredTrades.reduce((acc, trade) => {
+      const dateKey = getDateKey(new Date(trade.trade_date));
+      acc[dateKey] = (acc[dateKey] || 0) + trade.profit_loss;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(pnlByPeriod)
+      .map(([date, pnl]) => ({ date, pnl }))
+      .slice(-20); // Last 20 periods
+  }, [filteredTrades, timeRange]);
+
+  // Calculate drawdown
+  const drawdownData = useMemo(() => {
+    if (equityData.length === 0) return [];
+
+    let peak = equityData[0].equity;
+    return equityData.map((point) => {
+      if (point.equity > peak) peak = point.equity;
+      const drawdown = ((point.equity - peak) / peak) * 100;
+      return { date: point.date, drawdown: drawdown };
+    });
+  }, [equityData]);
+
+  // Calculate win/loss by period
+  const winLossData = useMemo(() => {
+    if (filteredTrades.length === 0) return [];
+
+    const getDateKey = (date: Date) => {
+      if (timeRange === "day") {
+        // Hourly
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } else if (timeRange === "week" || timeRange === "month") {
+        // Daily
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      } else {
+        // Monthly for year
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          year: "2-digit",
+        });
+      }
+    };
+
+    const periods = filteredTrades.reduce((acc, trade) => {
+      const periodKey = getDateKey(new Date(trade.trade_date));
+      if (!acc[periodKey]) acc[periodKey] = { wins: 0, losses: 0 };
+      if (trade.profit_loss > 0) acc[periodKey].wins++;
+      else if (trade.profit_loss < 0) acc[periodKey].losses++;
+      return acc;
+    }, {} as Record<string, { wins: number; losses: number }>);
+
+    return Object.entries(periods)
+      .map(([date, data]) => ({ date, ...data }))
+      .slice(-15); // Last 15 periods
+  }, [filteredTrades, timeRange]);
+
+  const timeRanges = [
+    { value: "day", label: "Jour" },
+    { value: "week", label: "Semaine" },
+    { value: "month", label: "Mois" },
+    { value: "year", label: "Année" },
   ];
-
-  // Données pour le PnL journalier
-  const pnlData = [
-    { date: "Jan 1", pnl: 120 },
-    { date: "Jan 8", pnl: -80 },
-    { date: "Jan 15", pnl: 250 },
-    { date: "Jan 22", pnl: -120 },
-    { date: "Jan 29", pnl: 380 },
-    { date: "Feb 5", pnl: 150 },
-    { date: "Feb 12", pnl: -90 },
-    { date: "Feb 19", pnl: 420 },
-    { date: "Feb 26", pnl: 200 },
-    { date: "Mar 5", pnl: 180 },
-  ];
-
-  // Données pour le drawdown
-  const drawdownData = [
-    { date: "Jan 1", drawdown: 0 },
-    { date: "Jan 8", drawdown: -2.5 },
-    { date: "Jan 15", drawdown: -1.8 },
-    { date: "Jan 22", drawdown: -3.2 },
-    { date: "Jan 29", drawdown: -1.2 },
-    { date: "Feb 5", drawdown: -0.8 },
-    { date: "Feb 12", drawdown: -2.1 },
-    { date: "Feb 19", drawdown: -0.5 },
-    { date: "Feb 26", drawdown: -1.5 },
-    { date: "Mar 5", drawdown: -0.3 },
-  ];
-
-  // Données pour le win/loss ratio
-  const winLossData = [
-    { date: "Week 1", wins: 12, losses: 5 },
-    { date: "Week 2", wins: 15, losses: 8 },
-    { date: "Week 3", wins: 18, losses: 6 },
-    { date: "Week 4", wins: 14, losses: 7 },
-    { date: "Week 5", wins: 20, losses: 9 },
-    { date: "Week 6", wins: 16, losses: 5 },
-    { date: "Week 7", wins: 19, losses: 8 },
-    { date: "Week 8", wins: 22, losses: 7 },
-  ];
-
-  const timeRanges = ["1W", "1M", "3M", "6M", "1Y", "ALL"];
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -85,24 +247,55 @@ export default function CurvesPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Performance Curves</h1>
           <p className="text-default-600">
-            Visualize your trading performance over time
+            {loading
+              ? "Loading performance data..."
+              : `Showing ${filteredTrades.length} of ${trades.length} trades`}
           </p>
         </div>
         <div className="flex items-center gap-2 p-1 rounded-lg border border-divider bg-white dark:bg-black">
           {timeRanges.map((range) => (
             <Button
-              key={range}
+              key={range.value}
               size="sm"
-              variant={timeRange === range ? "solid" : "light"}
-              color={timeRange === range ? "primary" : "default"}
-              onPress={() => setTimeRange(range)}
-              className="min-w-12"
+              variant={timeRange === range.value ? "solid" : "light"}
+              color={timeRange === range.value ? "primary" : "default"}
+              onPress={() => setTimeRange(range.value)}
+              className="min-w-16"
             >
-              {range}
+              {range.label}
             </Button>
           ))}
         </div>
       </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-12">
+          <Icon
+            icon="mdi:loading"
+            className="text-5xl animate-spin mx-auto mb-3 text-primary"
+          />
+          <p className="text-default-600">Loading charts...</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && trades.length === 0 && (
+        <div className="text-center py-12">
+          <Icon
+            icon="mdi:chart-line-variant"
+            className="text-5xl mx-auto mb-3 text-default-400"
+          />
+          <p className="text-default-600 mb-4">No trades found to display charts</p>
+          <Button color="primary" href="/dashboard/upload">
+            Import Trades
+          </Button>
+        </div>
+      )}
+
+      {/* Charts */}
+      {!loading && trades.length > 0 && (
+        <>
 
       {/* Equity Curve */}
       <div className="min-h-[400px]">
@@ -370,6 +563,8 @@ export default function CurvesPage() {
           </div>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }

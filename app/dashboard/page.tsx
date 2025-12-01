@@ -1,39 +1,103 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NextLink from "next/link";
 import { Button } from "@heroui/button";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { getTrades } from "@/app/actions/trades";
+import type { Trade } from "@/types/trades";
 
 export default function DashboardPage() {
-  // Sample data for equity curve
-  const equityCurveData = [
-    { day: 1, value: 10000 },
-    { day: 2, value: 10250 },
-    { day: 3, value: 10100 },
-    { day: 4, value: 10500 },
-    { day: 5, value: 10450 },
-    { day: 6, value: 10800 },
-    { day: 7, value: 10650 },
-    { day: 8, value: 11000 },
-    { day: 9, value: 10900 },
-    { day: 10, value: 11200 },
-    { day: 11, value: 11450 },
-    { day: 12, value: 11300 },
-    { day: 13, value: 11600 },
-    { day: 14, value: 11800 },
-    { day: 15, value: 12100 },
-    { day: 16, value: 12000 },
-    { day: 17, value: 12300 },
-    { day: 18, value: 12150 },
-    { day: 19, value: 12400 },
-    { day: 20, value: 12458 },
-  ];
+  const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
+  const [allTrades, setAllTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTrades() {
+      const [recentResult, allResult] = await Promise.all([
+        getTrades(5), // Last 5 trades for display
+        getTrades(), // All trades for statistics
+      ]);
+      
+      if (recentResult.data) {
+        setRecentTrades(recentResult.data);
+      }
+      if (allResult.data) {
+        setAllTrades(allResult.data);
+      }
+      setLoading(false);
+    }
+    fetchTrades();
+  }, []);
+
+  // Calculate statistics from real trades
+  const STARTING_BALANCE = 0;
+  const totalPnL = allTrades.reduce((sum, trade) => sum + trade.profit_loss, 0);
+  const currentBalance = STARTING_BALANCE + totalPnL;
+  const balanceChange = totalPnL >= 0 ? `+${totalPnL.toFixed(0)}` : totalPnL.toFixed(0);
+  
+  const winners = allTrades.filter(t => t.profit_loss > 0).length;
+  const losers = allTrades.filter(t => t.profit_loss < 0).length;
+  const totalTrades = allTrades.length;
+  const winRate = totalTrades > 0 ? ((winners / totalTrades) * 100).toFixed(1) : "0.0";
+  
+  const totalWins = allTrades
+    .filter(t => t.profit_loss > 0)
+    .reduce((sum, t) => sum + t.profit_loss, 0);
+  const totalLosses = Math.abs(
+    allTrades
+      .filter(t => t.profit_loss < 0)
+      .reduce((sum, t) => sum + t.profit_loss, 0)
+  );
+  const profitFactor = totalLosses > 0 ? (totalWins / totalLosses).toFixed(1) : "0.0";
+  
+  // Calculate max drawdown
+  let peak = STARTING_BALANCE;
+  let maxDrawdown = 0;
+  let runningBalance = STARTING_BALANCE;
+  
+  [...allTrades]
+    .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
+    .forEach(trade => {
+      runningBalance += trade.profit_loss;
+      if (runningBalance > peak) peak = runningBalance;
+      const drawdown = ((runningBalance - peak) / peak) * 100;
+      if (drawdown < maxDrawdown) maxDrawdown = drawdown;
+    });
+  
+  const maxDrawdownValue = (peak * Math.abs(maxDrawdown) / 100).toFixed(0);
+  
+  // Calculate average R-multiple (using average win vs average loss)
+  const avgWin = winners > 0 ? totalWins / winners : 0;
+  const avgLoss = losers > 0 ? totalLosses / losers : 0;
+  const avgRMultiple = avgLoss > 0 ? (avgWin / avgLoss).toFixed(1) : "0.0";
+
+  // Generate equity curve from last 20 trades
+  const last20Trades = [...allTrades]
+    .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
+    .slice(-20);
+  
+  const equityCurveData = last20Trades.length > 0 
+    ? (() => {
+        let balance = 0;
+        // Calculate starting balance for the last 20 trades
+        const tradesBeforeLast20 = [...allTrades]
+          .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
+          .slice(0, -20);
+        
+        balance += tradesBeforeLast20.reduce((sum, t) => sum + t.profit_loss, 0);
+        
+        return last20Trades.map((trade, index) => {
+          balance += trade.profit_loss;
+          return { day: index + 1, value: balance };
+        });
+      })()
+    : [{ day: 1, value: 0 }];
 
   const maxValue = Math.max(...equityCurveData.map((d) => d.value));
   const minValue = Math.min(...equityCurveData.map((d) => d.value));
-  const range = maxValue - minValue;
+  const range = maxValue - minValue || 1000; // Prevent division by zero
 
   return (
     <>
@@ -71,42 +135,42 @@ export default function DashboardPage() {
           {[
             {
               icon: "mdi:wallet",
-              label: "Account Balance",
-              value: "$22,458",
-              change: "+24.6%",
-              positive: true,
-              subtext: "Starting: $18,000",
+              label: "PnL Réalisé",
+              value: `${totalPnL >= 0 ? '+' : ''}$${Math.abs(totalPnL).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+              change: `${balanceChange}$`,
+              positive: totalPnL >= 0,
+              subtext: `${totalTrades} trades`,
             },
             {
               icon: "mdi:chart-line",
               label: "Win Rate",
-              value: "68.5%",
-              change: "97/142 trades",
-              positive: true,
-              subtext: "Target: 65%",
+              value: `${winRate}%`,
+              change: `${winners}/${totalTrades} trades`,
+              positive: parseFloat(winRate) >= 50,
+              subtext: `Target: 65%`,
             },
             {
               icon: "mdi:trending-up",
               label: "Profit Factor",
-              value: "2.8",
-              change: "+0.3",
-              positive: true,
-              subtext: "Excellent",
+              value: profitFactor,
+              change: totalTrades > 0 ? `${totalTrades} trades` : "No trades",
+              positive: parseFloat(profitFactor) >= 1.5,
+              subtext: parseFloat(profitFactor) >= 2 ? "Excellent" : parseFloat(profitFactor) >= 1.5 ? "Good" : "Needs work",
             },
             {
               icon: "mdi:arrow-down-bold",
               label: "Max Drawdown",
-              value: "8.2%",
-              change: "-$1,840",
+              value: `${Math.abs(maxDrawdown).toFixed(1)}%`,
+              change: `-$${maxDrawdownValue}`,
               positive: false,
-              subtext: "Acceptable",
+              subtext: Math.abs(maxDrawdown) < 10 ? "Acceptable" : "High",
             },
             {
               icon: "mdi:chart-box",
               label: "Avg R-Multiple",
-              value: "2.1R",
-              change: "+0.4R",
-              positive: true,
+              value: `${avgRMultiple}R`,
+              change: `${winners}W / ${losers}L`,
+              positive: parseFloat(avgRMultiple) >= 1.5,
               subtext: "Per trade",
             },
           ].map((stat, index) => (
@@ -393,113 +457,87 @@ export default function DashboardPage() {
                   </Button>
                 </div>
                 <div className="space-y-3">
-                  {[
-                    {
-                      pair: "EUR/USD",
-                      type: "Long",
-                      entry: "1.0850",
-                      exit: "1.0895",
-                      profit: "+$245.50",
-                      rr: "2.5R",
-                      positive: true,
-                      date: "Nov 25, 09:30",
-                    },
-                    {
-                      pair: "GBP/JPY",
-                      type: "Short",
-                      entry: "189.45",
-                      exit: "189.12",
-                      profit: "-$82.30",
-                      rr: "-0.8R",
-                      positive: false,
-                      date: "Nov 24, 14:15",
-                    },
-                    {
-                      pair: "XAU/USD",
-                      type: "Long",
-                      entry: "2042.50",
-                      exit: "2055.80",
-                      profit: "+$512.00",
-                      rr: "3.2R",
-                      positive: true,
-                      date: "Nov 24, 11:00",
-                    },
-                    {
-                      pair: "USD/CAD",
-                      type: "Short",
-                      entry: "1.3580",
-                      exit: "1.3545",
-                      profit: "+$128.75",
-                      rr: "1.9R",
-                      positive: true,
-                      date: "Nov 23, 16:45",
-                    },
-                    {
-                      pair: "BTC/USD",
-                      type: "Long",
-                      entry: "37250",
-                      exit: "37890",
-                      profit: "+$320.00",
-                      rr: "2.1R",
-                      positive: true,
-                      date: "Nov 23, 10:20",
-                    },
-                  ].map((trade, i) => (
+                  {loading ? (
+                    <div className="text-center py-8 text-default-600">
+                      <Icon icon="mdi:loading" className="text-3xl animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Chargement des trades...</p>
+                    </div>
+                  ) : recentTrades.length === 0 ? (
+                    <div className="text-center py-8 text-default-600">
+                      <Icon icon="mdi:information-outline" className="text-3xl mx-auto mb-2" />
+                      <p className="text-sm mb-3">Aucun trade trouvé</p>
+                      <Button
+                        as={NextLink}
+                        href="/dashboard/upload"
+                        color="primary"
+                        size="sm"
+                      >
+                        Importer des trades
+                      </Button>
+                    </div>
+                  ) : recentTrades.map((trade, i) => (
                     <div
-                      key={i}
+                      key={trade.id || i}
                       className="flex items-center justify-between p-4 rounded-lg border border-divider hover:bg-blue-50 dark:hover:bg-gray-900 transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <div
                           className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            trade.positive
+                            trade.profit_loss >= 0
                               ? "bg-success/20"
                               : "bg-danger/20"
                           }`}
                         >
                           <Icon
                             icon={
-                              trade.type === "Long"
+                              trade.side === "long" || trade.side === "buy"
                                 ? "mdi:arrow-up-bold"
                                 : "mdi:arrow-down-bold"
                             }
                             className={`text-xl ${
-                              trade.positive ? "text-success" : "text-danger"
+                              trade.profit_loss >= 0 ? "text-success" : "text-danger"
                             }`}
                           />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-semibold">{trade.pair}</p>
+                            <p className="font-semibold font-mono">{trade.symbol}</p>
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
-                                trade.type === "Long"
+                                trade.side === "long" || trade.side === "buy"
                                   ? "bg-success/20 text-success"
                                   : "bg-danger/20 text-danger"
                               }`}
                             >
-                              {trade.type}
+                              {trade.side.toUpperCase()}
                             </span>
                           </div>
                           <div className="flex items-center gap-3 text-xs text-default-600 mt-1">
-                            <span>Entry: {trade.entry}</span>
+                            <span>Entry: {trade.entry_price.toFixed(2)}</span>
                             <span>•</span>
-                            <span>Exit: {trade.exit}</span>
+                            <span>Exit: {trade.exit_price.toFixed(2)}</span>
                             <span>•</span>
-                            <span className="text-default-500">{trade.date}</span>
+                            <span className="text-default-500">
+                              {new Date(trade.trade_date).toLocaleDateString('fr-FR', { 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <span
                           className={`font-semibold text-lg ${
-                            trade.positive ? "text-success" : "text-danger"
+                            trade.profit_loss >= 0 ? "text-success" : "text-danger"
                           }`}
                         >
-                          {trade.profit}
+                          {trade.profit_loss >= 0 ? '+' : ''}{trade.profit_loss.toFixed(2)}$
                         </span>
                         <p className="text-xs text-default-600 mt-1">
-                          {trade.rr}
+                          {trade.quantity}x
                         </p>
                       </div>
                     </div>

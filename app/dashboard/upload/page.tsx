@@ -5,6 +5,10 @@ import { Button } from "@heroui/button";
 import { useState } from "react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import NextLink from "next/link";
+import { processCSVFile } from "@/lib/parsers/csvParser";
+import { uploadTrades } from "@/app/actions/trades";
+import { getUser } from "@/app/actions/auth";
+import type { Trade } from "@/types/trades";
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);
@@ -12,6 +16,8 @@ export default function UploadPage() {
   const [selectedBroker, setSelectedBroker] = useState("auto");
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [parsedTrades, setParsedTrades] = useState<Trade[] | null>(null);
   const [csvPreview, setCsvPreview] = useState<string[][] | null>(null);
 
   const brokers = [
@@ -62,29 +68,68 @@ export default function UploadPage() {
     }
   };
 
-  const previewCSV = (file: File) => {
+  const previewCSV = async (file: File) => {
+    setUploadError(null);
+    setParsedTrades(null);
+    
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const text = e.target?.result as string;
-      const lines = text.split('\n').slice(0, 6); // First 6 lines
+      const lines = text.split('\n').slice(0, 8); // First 8 lines
       const preview = lines.map(line => line.split(','));
       setCsvPreview(preview);
+
+      // Parse trades
+      try {
+        const user = await getUser();
+        if (!user) {
+          setUploadError("Vous devez être connecté pour uploader des trades");
+          return;
+        }
+
+        const trades = await processCSVFile(file, user.id);
+        setParsedTrades(trades);
+        
+        if (trades.length === 0) {
+          setUploadError("Aucun trade complet trouvé dans le fichier. Assurez-vous d'avoir des ordres 'Filled' avec des paires buy/sell.");
+        }
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+        setUploadError("Erreur lors de l'analyse du fichier CSV");
+      }
     };
     reader.readAsText(file);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
+    if (!parsedTrades || parsedTrades.length === 0) {
+      setUploadError("Aucun trade à uploader");
+      return;
+    }
+
     setUploading(true);
-    // Simulate upload
-    setTimeout(() => {
+    setUploadError(null);
+
+    try {
+      const result = await uploadTrades(parsedTrades);
+      
+      if (result.error) {
+        setUploadError(result.error);
+      } else {
+        setUploadSuccess(true);
+        setTimeout(() => {
+          setUploadSuccess(false);
+          setFile(null);
+          setCsvPreview(null);
+          setParsedTrades(null);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError("Erreur lors de l'upload des trades");
+    } finally {
       setUploading(false);
-      setUploadSuccess(true);
-      setTimeout(() => {
-        setUploadSuccess(false);
-        setFile(null);
-        setCsvPreview(null);
-      }, 3000);
-    }, 2000);
+    }
   };
 
   return (
@@ -235,12 +280,32 @@ export default function UploadPage() {
                   </div>
                 </div>
 
+                {parsedTrades && parsedTrades.length > 0 && (
+                  <div className="flex items-center gap-3 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                    <Icon icon="mdi:information" className="text-2xl text-primary" />
+                    <div>
+                      <p className="font-semibold text-primary">{parsedTrades.length} trades détectés</p>
+                      <p className="text-sm text-default-600">Prêt à être importé</p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadError && (
+                  <div className="flex items-center gap-3 p-4 bg-danger/10 border border-danger/20 rounded-lg">
+                    <Icon icon="mdi:alert-circle" className="text-2xl text-danger" />
+                    <div>
+                      <p className="font-semibold text-danger">Erreur</p>
+                      <p className="text-sm text-default-600">{uploadError}</p>
+                    </div>
+                  </div>
+                )}
+
                 {uploadSuccess && (
                   <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/20 rounded-lg">
                     <Icon icon="mdi:check-circle" className="text-2xl text-success" />
                     <div>
                       <p className="font-semibold text-success">Import réussi!</p>
-                      <p className="text-sm text-default-600">Vos trades ont été importés avec succès</p>
+                      <p className="text-sm text-default-600">{parsedTrades?.length || 0} trades ont été importés avec succès</p>
                     </div>
                   </div>
                 )}
@@ -269,6 +334,76 @@ export default function UploadPage() {
               </div>
             </div>
 
+            {/* Parsed Trades Preview */}
+            {parsedTrades && parsedTrades.length > 0 && (
+              <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <Icon icon="mdi:table-eye" className="text-xl" />
+                    Trades détectés ({parsedTrades.length})
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="font-semibold bg-default-100 dark:bg-default-800">
+                          <th className="px-3 py-2 border border-divider text-left">Symbol</th>
+                          <th className="px-3 py-2 border border-divider text-left">Side</th>
+                          <th className="px-3 py-2 border border-divider text-right">Entry</th>
+                          <th className="px-3 py-2 border border-divider text-right">Exit</th>
+                          <th className="px-3 py-2 border border-divider text-right">Qty</th>
+                          <th className="px-3 py-2 border border-divider text-right">P&L</th>
+                          <th className="px-3 py-2 border border-divider text-right">Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsedTrades.slice(0, 10).map((trade, i) => (
+                          <tr key={i} className="hover:bg-default-50 dark:hover:bg-default-900">
+                            <td className="px-3 py-2 border border-divider font-mono">{trade.symbol}</td>
+                            <td className="px-3 py-2 border border-divider">
+                              <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                trade.side === 'long' || trade.side === 'buy' 
+                                  ? 'bg-success/20 text-success' 
+                                  : 'bg-danger/20 text-danger'
+                              }`}>
+                                {trade.side.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 border border-divider text-right font-mono">
+                              {trade.entry_price.toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2 border border-divider text-right font-mono">
+                              {trade.exit_price.toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2 border border-divider text-right">
+                              {trade.quantity}
+                            </td>
+                            <td className={`px-3 py-2 border border-divider text-right font-semibold ${
+                              trade.profit_loss >= 0 ? 'text-success' : 'text-danger'
+                            }`}>
+                              {trade.profit_loss >= 0 ? '+' : ''}{trade.profit_loss.toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2 border border-divider text-right text-xs">
+                              {trade.duration_minutes ? `${trade.duration_minutes}m` : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-default-600">
+                    Affichage des {Math.min(10, parsedTrades.length)} premiers trades sur {parsedTrades.length} détectés
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* CSV Preview */}
             {csvPreview && (
               <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
@@ -281,16 +416,16 @@ export default function UploadPage() {
                 />
                 <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                   <h3 className="text-lg font-bold flex items-center gap-2">
-                    <Icon icon="mdi:table-eye" className="text-xl" />
-                    Aperçu du fichier
+                    <Icon icon="mdi:file-eye" className="text-xl" />
+                    Aperçu du fichier brut
                   </h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-xs">
                       <tbody>
                         {csvPreview.map((row, i) => (
                           <tr key={i} className={i === 0 ? "font-semibold bg-default-100 dark:bg-default-800" : "hover:bg-default-50 dark:hover:bg-default-900"}>
-                            {row.map((cell, j) => (
-                              <td key={j} className="px-3 py-2 border border-divider">
+                            {row.slice(0, 8).map((cell, j) => (
+                              <td key={j} className="px-2 py-1 border border-divider truncate max-w-[120px]">
                                 {cell}
                               </td>
                             ))}
@@ -300,7 +435,7 @@ export default function UploadPage() {
                     </table>
                   </div>
                   <p className="text-xs text-default-600">
-                    Affichage des 5 premières lignes • {csvPreview.length - 1} lignes détectées
+                    Premières lignes du fichier CSV
                   </p>
                 </div>
               </div>

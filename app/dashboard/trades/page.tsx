@@ -3,158 +3,159 @@
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/button";
 import { useEffect, useState } from "react";
-import {
-  MyTrade,
-  readAllTrades,
-  writeAllTrades,
-} from "@/components/trades/helpers";
-import { Setup } from "@/components/analytics/types";
-
-function readSetupsFromStorage(): Setup[] {
-  try {
-    const raw = localStorage.getItem("vizion:setups");
-    if (!raw) return [];
-    return JSON.parse(raw) as Setup[];
-  } catch (e) {
-    return [];
-  }
-}
+import NextLink from "next/link";
+import { getTrades } from "@/app/actions/trades";
+import { TradesTable } from "@/components/trades/TradesTable";
+import type { Trade } from "@/types/trades";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 export default function TradesPage() {
-  const [trades, setTrades] = useState<MyTrade[]>([]);
-  const [editing, setEditing] = useState<Record<string, Partial<MyTrade>>>({});
-
-  const [setups, setSetups] = useState<Setup[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const all = readAllTrades();
-    setTrades(all);
-    setSetups(readSetupsFromStorage());
+    async function fetchTrades() {
+      const result = await getTrades();
+      if (result.data) {
+        setTrades(result.data);
+      }
+      setLoading(false);
+    }
+    fetchTrades();
   }, []);
 
-  function saveTrade(id: string) {
-    const edit = editing[id];
-    if (!edit) return;
-    setTrades((prev) => {
-      const next = prev.map((t) => (t.id === id ? { ...t, ...edit } : t));
-      writeAllTrades(next);
-      return next;
-    });
-    setEditing((prev) => {
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
-  }
-
-  function deleteTrade(id: string) {
-    setTrades((prev) => {
-      const next = prev.filter((t) => t.id !== id);
-      writeAllTrades(next);
-      return next;
-    });
-  }
+  // Calculate stats
+  const stats = {
+    totalTrades: trades.length,
+    totalPnL: trades.reduce((sum, t) => sum + t.profit_loss, 0),
+    winners: trades.filter((t) => t.profit_loss > 0).length,
+    losers: trades.filter((t) => t.profit_loss < 0).length,
+    winRate: trades.length > 0 ? (trades.filter((t) => t.profit_loss > 0).length / trades.length) * 100 : 0,
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
-        <Icon icon="mdi:chart-line" className="text-xl" /> My Trades
-      </h1>
-      <div className="mb-6 flex justify-end">
-        <Button color="primary" href="/dashboard/trades/new">
-          <Icon icon="mdi:plus" className="text-xl mr-2" /> Add Trade
-        </Button>
-      </div>
+    <>
+      {/* Header */}
+      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Icon icon="mdi:chart-line" className="text-2xl" />
+            My Trades
+          </h2>
+          <p className="text-sm text-default-600">
+            View and manage all your trades
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            as={NextLink}
+            href="/dashboard/upload"
+            color="primary"
+            size="sm"
+          >
+            <Icon icon="mdi:upload" className="text-lg" />
+            Import CSV
+          </Button>
+          <Button
+            as={NextLink}
+            href="/dashboard/trades/new"
+            variant="bordered"
+            size="sm"
+          >
+            <Icon icon="mdi:plus" className="text-lg" />
+            Add Trade
+          </Button>
+        </div>
+      </header>
 
-      <div className="rounded-xl border border-divider bg-white dark:bg-black p-4 overflow-x-auto">
-        <table className="min-w-full w-full text-left table-auto">
-          <thead>
-            <tr className="text-sm text-default-500">
-              <th className="px-3 py-2">Date</th>
-              <th className="px-3 py-2">Instrument</th>
-              <th className="px-3 py-2">Symbol</th>
-              <th className="px-3 py-2">PnL</th>
-              <th className="px-3 py-2">Setup</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {trades.map((t) => (
-              <tr
-                key={t.id}
-                className="hover:bg-default-50 dark:hover:bg-gray-900"
-              >
-                <td className="px-3 py-3 text-sm">{t.date}</td>
-                <td className="px-3 py-3 text-sm">{t.instrument ?? "-"}</td>
-                <td className="px-3 py-3 text-sm">{t.symbol}</td>
-                <td
-                  className={`px-3 py-3 text-sm font-semibold ${t.pnl >= 0 ? "text-success" : "text-danger"}`}
-                >
-                  {t.pnl >= 0 ? "+" : ""}
-                  {t.pnl.toFixed(2)} €
-                </td>
-                <td className="px-3 py-3 text-sm">
-                  <select
-                    value={editing[t.id]?.setupId ?? t.setupId ?? ""}
-                    onChange={(e) =>
-                      setEditing((prev) => ({
-                        ...prev,
-                        [t.id]: {
-                          ...(prev[t.id] ?? {}),
-                          setupId: e.target.value,
-                        },
-                      }))
-                    }
-                    className="rounded-md border p-2 bg-transparent"
-                  >
-                    <option value="">None</option>
-                    {setups.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-3 py-3 text-sm">
-                  <select
-                    value={editing[t.id]?.status ?? t.status ?? "Long"}
-                    onChange={(e) =>
-                      setEditing((prev) => ({
-                        ...prev,
-                        [t.id]: {
-                          ...(prev[t.id] ?? {}),
-                          status: e.target.value as any,
-                        },
-                      }))
-                    }
-                    className="rounded-md border p-2 bg-transparent"
-                  >
-                    <option value="Long">Long</option>
-                    <option value="Short">Short</option>
-                  </select>
-                </td>
-                <td className="px-3 py-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="px-2 py-1 rounded-md border text-sm"
-                      onClick={() => saveTrade(t.id)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      className="px-2 py-1 rounded-md border text-sm text-destructive"
-                      onClick={() => deleteTrade(t.id)}
-                    >
-                      Delete
-                    </button>
+      {/* Main Content */}
+      <div className="p-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {[
+            {
+              icon: "mdi:chart-box",
+              label: "Total Trades",
+              value: stats.totalTrades,
+              color: "text-primary",
+            },
+            {
+              icon: "mdi:currency-usd",
+              label: "Total P&L",
+              value: `${stats.totalPnL >= 0 ? '+' : ''}${stats.totalPnL.toFixed(2)}$`,
+              color: stats.totalPnL >= 0 ? "text-success" : "text-danger",
+            },
+            {
+              icon: "mdi:trophy",
+              label: "Win Rate",
+              value: `${stats.winRate.toFixed(1)}%`,
+              color: "text-success",
+            },
+            {
+              icon: "mdi:check-circle",
+              label: "Winners",
+              value: stats.winners,
+              color: "text-success",
+            },
+            {
+              icon: "mdi:close-circle",
+              label: "Losers",
+              value: stats.losers,
+              color: "text-danger",
+            },
+          ].map((stat, index) => (
+            <div key={index} className="min-h-[120px]">
+              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-5 bg-white dark:bg-black border border-divider">
+                  <div className="w-fit rounded-lg border border-gray-600 p-2">
+                    <Icon
+                      icon={stat.icon}
+                      className={`text-xl ${stat.color}`}
+                    />
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <div>
+                    <h3 className={`text-2xl font-bold mb-1 ${stat.color}`}>{stat.value}</h3>
+                    <p className="text-sm text-default-600">
+                      {stat.label}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Trades Table */}
+        <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
+          <GlowingEffect
+            spread={40}
+            glow={true}
+            disabled={false}
+            proximity={64}
+            inactiveZone={0.01}
+          />
+          <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xl font-bold">All Trades</h3>
+            </div>
+            {loading ? (
+              <div className="text-center py-12">
+                <Icon icon="mdi:loading" className="text-4xl animate-spin mx-auto mb-3 text-primary" />
+                <p className="text-default-600">Loading trades...</p>
+              </div>
+            ) : (
+              <TradesTable trades={trades} showActions={true} maxHeight="calc(100vh - 450px)" />
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
