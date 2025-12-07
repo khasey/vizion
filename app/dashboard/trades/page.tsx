@@ -14,15 +14,17 @@ export default function TradesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchTrades() {
-      const result = await getTrades();
-      if (result.data) {
-        setTrades(result.data);
-      }
-      setLoading(false);
-    }
     fetchTrades();
   }, []);
+
+  async function fetchTrades() {
+    setLoading(true);
+    const result = await getTrades();
+    if (result.data) {
+      setTrades(result.data);
+    }
+    setLoading(false);
+  }
 
   // Calculate stats
   const stats = {
@@ -151,7 +153,7 @@ export default function TradesPage() {
                 <p className="text-default-600">Loading trades...</p>
               </div>
             ) : (
-              <TradesTable trades={trades} showActions={true} maxHeight="calc(100vh - 450px)" />
+              <TradesTable trades={trades} showActions={true} maxHeight="calc(100vh - 450px)" onTradeUpdate={fetchTrades} />
             )}
           </div>
         </div>

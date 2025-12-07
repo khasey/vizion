@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import NextLink from "next/link";
 import { Button } from "@heroui/button";
 import { VizionLogo } from "@/components/vizion-logo";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { getUser, signOut } from "@/app/actions/auth";
 
 export default function DashboardLayout({
   children,
@@ -13,6 +14,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const userData = await getUser();
+      if (userData) {
+        setUser(userData);
+      }
+    }
+    fetchUser();
+  }, []);
 
   const menuItems = [
     {
@@ -44,11 +56,6 @@ export default function DashboardLayout({
       title: "Insights IA",
       icon: "mdi:robot",
       href: "/dashboard/insights",
-    },
-    {
-      title: "Brokers",
-      icon: "mdi:connection",
-      href: "/dashboard/brokers",
     },
     {
       title: "Upload",
@@ -98,24 +105,64 @@ export default function DashboardLayout({
             </NextLink>
           );
         })}
+        
+        {/* Theme Switcher */}
+        <div className={`flex items-center gap-3 px-3 py-2.5 ${!sidebarOpen ? "justify-center" : ""}`}>
+          <ThemeSwitch />
+          {sidebarOpen && <span className="text-sm text-default-600">Theme</span>}
+        </div>
       </nav>
 
-      {/* User Profile & Theme Switch */}
-      <div className="p-4 border-t border-divider flex flex-col gap-4">
+      {/* User Profile & Settings */}
+      <div className="p-4 border-t border-divider space-y-3">
+        {/* User Profile */}
         <div className={`flex items-center gap-3 ${!sidebarOpen ? "justify-center" : ""}`}>
           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold flex-shrink-0">
-            JD
+            {user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
           </div>
           {sidebarOpen && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">John Doe</p>
-              <p className="text-xs text-default-500 truncate">john@example.com</p>
+              <p className="text-sm font-semibold truncate">
+                {user?.full_name || 'Loading...'}
+              </p>
+              <p className="text-xs text-default-500 truncate">
+                {user?.email || ''}
+              </p>
             </div>
           )}
         </div>
-        <div className={`${!sidebarOpen ? "justify-center" : ""} flex w-full`}>
-          <ThemeSwitch />
-        </div>
+
+        {/* Logout Button */}
+        {sidebarOpen && (
+          <Button
+            variant="light"
+            className="w-full justify-start text-danger"
+            onPress={async () => {
+              await signOut();
+              window.location.href = '/signin';
+            }}
+          >
+            <Icon icon="mdi:logout" className="text-lg" />
+            <span className="text-sm">Se déconnecter</span>
+          </Button>
+        )}
+        
+        {/* Collapsed logout */}
+        {!sidebarOpen && (
+          <Button
+            isIconOnly
+            variant="light"
+            size="sm"
+            onPress={async () => {
+              await signOut();
+              window.location.href = '/signin';
+            }}
+            title="Se déconnecter"
+            className="mx-auto"
+          >
+            <Icon icon="mdi:logout" className="text-lg text-danger" />
+          </Button>
+        )}
       </div>
     </>
   );

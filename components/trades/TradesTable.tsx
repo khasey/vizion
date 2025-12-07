@@ -1,19 +1,48 @@
 "use client";
 
 import { Icon } from "@iconify/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Trade } from "@/types/trades";
+import type { Strategy } from "@/types/strategies";
+import { getStrategies } from "@/app/actions/strategies";
+import { updateTradeStrategy } from "@/app/actions/trades";
 
 interface TradesTableProps {
   trades: Trade[];
   showActions?: boolean;
   maxHeight?: string;
+  onTradeUpdate?: () => void;
 }
 
-export function TradesTable({ trades, showActions = false, maxHeight = "600px" }: TradesTableProps) {
+export function TradesTable({ trades, showActions = false, maxHeight = "600px", onTradeUpdate }: TradesTableProps) {
   const [sortField, setSortField] = useState<keyof Trade>("trade_date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterSymbol, setFilterSymbol] = useState<string>("all");
+  const [filterStrategy, setFilterStrategy] = useState<string>("all");
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [updatingTradeId, setUpdatingTradeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchStrategies() {
+      const result = await getStrategies();
+      if (result.data) {
+        setStrategies(result.data);
+      }
+    }
+    fetchStrategies();
+  }, []);
+
+  async function handleStrategyChange(tradeId: string, strategyId: string) {
+    setUpdatingTradeId(tradeId);
+    const result = await updateTradeStrategy(tradeId, strategyId === "none" ? null : strategyId);
+    setUpdatingTradeId(null);
+    
+    if (result.error) {
+      console.error("Error updating strategy:", result.error);
+    } else if (onTradeUpdate) {
+      onTradeUpdate();
+    }
+  }
 
   // Get unique symbols
   const symbols = useMemo(() => {
@@ -27,6 +56,14 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
 
     if (filterSymbol !== "all") {
       filtered = filtered.filter((t) => t.symbol === filterSymbol);
+    }
+
+    if (filterStrategy !== "all") {
+      if (filterStrategy === "none") {
+        filtered = filtered.filter((t) => !t.strategy_id);
+      } else {
+        filtered = filtered.filter((t) => t.strategy_id === filterStrategy);
+      }
     }
 
     filtered.sort((a, b) => {
@@ -50,7 +87,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
     });
 
     return filtered;
-  }, [trades, filterSymbol, sortField, sortDirection]);
+  }, [trades, filterSymbol, filterStrategy, sortField, sortDirection]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -79,7 +116,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
     });
   };
 
-  const formatTime = (timeString: string | null) => {
+  const formatTime = (timeString: string | null | undefined) => {
     if (!timeString) return "-";
     return timeString.substring(0, 5);
   };
@@ -98,6 +135,19 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
             {symbols.map((symbol) => (
               <option key={symbol} value={symbol}>
                 {symbol}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterStrategy}
+            onChange={(e) => setFilterStrategy(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-divider bg-white dark:bg-black text-sm"
+          >
+            <option value="all">Toutes les stratégies</option>
+            <option value="none">Sans stratégie</option>
+            {strategies.map((strategy) => (
+              <option key={strategy.id} value={strategy.id}>
+                {strategy.name}
               </option>
             ))}
           </select>
@@ -173,6 +223,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
                 </div>
               </th>
               <th className="px-3 py-3 text-left font-semibold">Side</th>
+              <th className="px-3 py-3 text-left font-semibold">Strategy</th>
               <th className="px-3 py-3 text-right font-semibold">Entry</th>
               <th className="px-3 py-3 text-right font-semibold">Exit</th>
               <th className="px-3 py-3 text-center font-semibold">Qty</th>
@@ -219,6 +270,31 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px" }
                   >
                     {trade.side.toUpperCase()}
                   </span>
+                </td>
+                <td className="px-3 py-3">
+                  <div className="relative">
+                    {trade.strategy_id && (
+                      <div
+                        className="absolute left-0 top-0 bottom-0 w-1 rounded-l"
+                        style={{ backgroundColor: strategies.find(s => s.id === trade.strategy_id)?.color || "#3b82f6" }}
+                      />
+                    )}
+                    <select
+                      value={trade.strategy_id || "none"}
+                      onChange={(e) => handleStrategyChange(trade.id!, e.target.value)}
+                      disabled={updatingTradeId === trade.id}
+                      className={`w-full px-2 py-1 rounded text-xs border border-divider bg-white dark:bg-black disabled:opacity-50 hover:bg-default-50 dark:hover:bg-default-900 transition-colors ${
+                        trade.strategy_id ? "pl-3" : ""
+                      }`}
+                    >
+                      <option value="none">—</option>
+                      {strategies.map((strategy) => (
+                        <option key={strategy.id} value={strategy.id}>
+                          {strategy.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </td>
                 <td className="px-3 py-3 text-right font-mono">
                   {trade.entry_price.toFixed(2)}

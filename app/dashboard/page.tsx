@@ -73,7 +73,7 @@ export default function DashboardPage() {
   const avgLoss = losers > 0 ? totalLosses / losers : 0;
   const avgRMultiple = avgLoss > 0 ? (avgWin / avgLoss).toFixed(1) : "0.0";
 
-  // Generate equity curve from last 20 trades
+  // Generate equity curve and PnL curve from last 20 trades
   const last20Trades = [...allTrades]
     .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
     .slice(-20);
@@ -89,14 +89,20 @@ export default function DashboardPage() {
         balance += tradesBeforeLast20.reduce((sum, t) => sum + t.profit_loss, 0);
         
         return last20Trades.map((trade, index) => {
-          balance += trade.profit_loss;
-          return { day: index + 1, value: balance };
+          const tradePnL = trade.profit_loss;
+          balance += tradePnL;
+          return { day: index + 1, equity: balance, pnl: tradePnL };
         });
       })()
-    : [{ day: 1, value: 0 }];
+    : [{ day: 1, equity: 0, pnl: 0 }];
 
-  const maxValue = Math.max(...equityCurveData.map((d) => d.value));
-  const minValue = Math.min(...equityCurveData.map((d) => d.value));
+  const maxEquity = Math.max(...equityCurveData.map((d) => d.equity));
+  const minEquity = Math.min(...equityCurveData.map((d) => d.equity));
+  const maxPnL = Math.max(...equityCurveData.map((d) => d.pnl), 0);
+  const minPnL = Math.min(...equityCurveData.map((d) => d.pnl), 0);
+  
+  const maxValue = Math.max(maxEquity, maxPnL);
+  const minValue = Math.min(minEquity, minPnL);
   const range = maxValue - minValue || 1000; // Prevent division by zero
 
   return (
@@ -231,24 +237,20 @@ export default function DashboardPage() {
               <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="text-xl font-bold">Equity Curve</h3>
+                    <h3 className="text-xl font-bold">Performance Overview</h3>
                     <p className="text-sm text-default-600">
-                      Last 20 trading days
+                      Last 20 trades - Equity & PnL
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="light" size="sm">
-                      1W
-                    </Button>
-                    <Button variant="light" size="sm" color="primary">
-                      1M
-                    </Button>
-                    <Button variant="light" size="sm">
-                      3M
-                    </Button>
-                    <Button variant="light" size="sm">
-                      1Y
-                    </Button>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span className="text-default-600">Equity Curve</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span className="text-default-600">Trade PnL</span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex-1 relative">
@@ -298,19 +300,40 @@ export default function DashboardPage() {
                       {/* Equity curve line */}
                       <polyline
                         fill="none"
-                        stroke="url(#gradient)"
-                        strokeWidth="3"
+                        stroke="#3b82f6"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         points={equityCurveData
                           .map((d, i) => {
                             const x = (i / (equityCurveData.length - 1)) * 400;
                             const y =
-                              200 - ((d.value - minValue) / range) * 200;
+                              200 - ((d.equity - minValue) / range) * 200;
                             return `${x},${y}`;
                           })
                           .join(" ")}
                       />
+                      {/* PnL bars */}
+                      {equityCurveData.map((d, i) => {
+                        const x = (i / (equityCurveData.length - 1)) * 400;
+                        const barWidth = 400 / equityCurveData.length * 0.6;
+                        const zeroY = 200 - ((0 - minValue) / range) * 200;
+                        const pnlY = 200 - ((d.pnl - minValue) / range) * 200;
+                        const barHeight = Math.abs(zeroY - pnlY);
+                        const barY = d.pnl >= 0 ? pnlY : zeroY;
+                        
+                        return (
+                          <rect
+                            key={i}
+                            x={x - barWidth / 2}
+                            y={barY}
+                            width={barWidth}
+                            height={barHeight}
+                            fill={d.pnl >= 0 ? "#22c55e" : "#ef4444"}
+                            opacity="0.6"
+                          />
+                        );
+                      })}
                       {/* Gradient fill under curve */}
                       <defs>
                         <linearGradient
@@ -352,7 +375,7 @@ export default function DashboardPage() {
                           .map((d, i) => {
                             const x = (i / (equityCurveData.length - 1)) * 400;
                             const y =
-                              200 - ((d.value - minValue) / range) * 200;
+                              200 - ((d.equity - minValue) / range) * 200;
                             return `${x},${y}`;
                           })
                           .join(" ")} 400,200`}

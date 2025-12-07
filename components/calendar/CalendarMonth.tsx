@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
-import { readDayTrades } from "./helpers";
 import CalendarJournal from "./CalendarJournal";
+import type { Trade } from "@/types/trades";
 
 function startOfMonth(year: number, month: number) {
   return new Date(year, month, 1);
@@ -36,7 +36,17 @@ function getCalendarEnd(year: number, month: number) {
   return end;
 }
 
-export default function CalendarMonth({ year, month }: { year?: number; month?: number }) {
+export default function CalendarMonth({ 
+  year, 
+  month, 
+  trades,
+  onMonthChange 
+}: { 
+  year?: number; 
+  month?: number;
+  trades: Trade[];
+  onMonthChange?: (year: number, month: number) => void;
+}) {
   const now = new Date();
   const initYear = year ?? now.getFullYear();
   const initMonth = typeof month === "number" ? month : now.getMonth();
@@ -55,12 +65,25 @@ export default function CalendarMonth({ year, month }: { year?: number; month?: 
     return arr;
   }, [start, end]);
 
+  // Group trades by date
+  const tradesByDate = useMemo(() => {
+    const grouped: Record<string, Trade[]> = {};
+    trades.forEach(trade => {
+      const dateKey = trade.trade_date.split('T')[0]; // YYYY-MM-DD
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(trade);
+    });
+    return grouped;
+  }, [trades]);
+
   function daySummary(date: string) {
-    const trades = readDayTrades(date);
-    if (!trades || trades.length === 0) return { trades: 0, pnl: 0 };
+    const dayTrades = tradesByDate[date] || [];
+    if (dayTrades.length === 0) return { trades: 0, pnl: 0 };
     return {
-      trades: trades.length,
-      pnl: trades.reduce((s, t) => s + t.pnl, 0),
+      trades: dayTrades.length,
+      pnl: dayTrades.reduce((s: number, t: Trade) => s + t.profit_loss, 0),
     };
   }
 
@@ -72,16 +95,22 @@ export default function CalendarMonth({ year, month }: { year?: number; month?: 
             <div className="flex items-center gap-2">
               <button className="px-2 py-1 rounded-md border" onClick={() => {
                 const prev = new Date(curYear, curMonth - 1);
-                setCurYear(prev.getFullYear());
-                setCurMonth(prev.getMonth());
+                const newYear = prev.getFullYear();
+                const newMonth = prev.getMonth();
+                setCurYear(newYear);
+                setCurMonth(newMonth);
+                onMonthChange?.(newYear, newMonth);
               }}>
                 <Icon icon="mdi:chevron-left" />
               </button>
               <h2 className="text-lg font-semibold">{new Date(curYear, curMonth).toLocaleString(undefined, { month: 'long', year: 'numeric' })}</h2>
               <button className="px-2 py-1 rounded-md border" onClick={() => {
                 const next = new Date(curYear, curMonth + 1);
-                setCurYear(next.getFullYear());
-                setCurMonth(next.getMonth());
+                const newYear = next.getFullYear();
+                const newMonth = next.getMonth();
+                setCurYear(newYear);
+                setCurMonth(newMonth);
+                onMonthChange?.(newYear, newMonth);
               }}>
                 <Icon icon="mdi:chevron-right" />
               </button>
@@ -100,7 +129,7 @@ export default function CalendarMonth({ year, month }: { year?: number; month?: 
           const isCurrentMonth = d.getMonth() === curMonth;
           const date = formatDate(d);
           const sum = daySummary(date);
-          const tradesList = readDayTrades(date);
+          const dayTrades = tradesByDate[date] || [];
           const positive = sum.pnl > 0;
           return (
             <div key={date} className={`rounded-lg p-2 border cursor-pointer flex flex-col justify-between ${isCurrentMonth ? "bg-white dark:bg-black" : "bg-default-100/60 dark:bg-default-900/60 opacity-50"} border-divider`} onClick={() => setSelectedDate(date)}>
@@ -109,12 +138,14 @@ export default function CalendarMonth({ year, month }: { year?: number; month?: 
                 <div className={`text-xs font-semibold ${positive ? "text-success" : sum.pnl === 0 ? "text-default-500" : "text-danger"}`}>{sum.trades ? `${sum.trades} trades` : "—"}</div>
               </div>
               <div className="mt-2">
-                <div className={`text-sm font-semibold ${positive ? "text-success" : sum.pnl === 0 ? "text-default-500" : "text-danger"}`}>{sum.pnl >= 0 ? "+" : ""}{sum.pnl.toFixed(2)} €</div>
+                <div className={`text-sm font-semibold ${positive ? "text-success" : sum.pnl === 0 ? "text-default-500" : "text-danger"}`}>{sum.pnl >= 0 ? "+" : ""}{sum.pnl.toFixed(2)}$</div>
                 <div className="mt-1 space-y-1 text-xs text-default-600">
-                  {tradesList.slice(0,3).map(t => (
-                    <div key={t.id} className="truncate">{t.time} • {t.notes ?? t.pnl.toFixed(2)} • {t.pnl >= 0 ? "+" : ""}{t.pnl.toFixed(2)} €</div>
+                  {dayTrades.slice(0,3).map((t: Trade) => (
+                    <div key={t.id} className="truncate">
+                      {new Date(t.trade_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} • {t.symbol} • {t.profit_loss >= 0 ? "+" : ""}{t.profit_loss.toFixed(2)}$
+                    </div>
                   ))}
-                  {tradesList.length > 3 && <div className="text-xs text-default-500">+{tradesList.length - 3} more</div>}
+                  {dayTrades.length > 3 && <div className="text-xs text-default-500">+{dayTrades.length - 3} more</div>}
                 </div>
               </div>
             </div>
@@ -123,7 +154,11 @@ export default function CalendarMonth({ year, month }: { year?: number; month?: 
       </div>
 
       {/* Day details */}
-      <CalendarJournal selectedDate={selectedDate} onClose={() => setSelectedDate(null)} />
+      <CalendarJournal 
+        selectedDate={selectedDate} 
+        onClose={() => setSelectedDate(null)} 
+        trades={selectedDate ? (tradesByDate[selectedDate] || []) : []}
+      />
     </div>
   );
 }

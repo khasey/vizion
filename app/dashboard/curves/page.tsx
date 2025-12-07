@@ -68,7 +68,9 @@ export default function CurvesPage() {
 
   // Calculate equity curve from filtered trades
   const equityData = useMemo(() => {
-    if (filteredTrades.length === 0) return [];
+    if (filteredTrades.length === 0) {
+      return [{ date: "Start", equity: 0, balance: 0 }];
+    }
 
     const STARTING_BALANCE = 0;
     const sortedTrades = [...filteredTrades].sort(
@@ -147,7 +149,9 @@ export default function CurvesPage() {
 
   // Calculate PnL based on timerange
   const pnlData = useMemo(() => {
-    if (filteredTrades.length === 0) return [];
+    if (filteredTrades.length === 0) {
+      return [{ date: "No data", pnl: 0 }];
+    }
 
     const getDateKey = (date: Date) => {
       if (timeRange === "day") {
@@ -184,19 +188,24 @@ export default function CurvesPage() {
 
   // Calculate drawdown
   const drawdownData = useMemo(() => {
-    if (equityData.length === 0) return [];
+    if (equityData.length === 0) {
+      return [{ date: "No data", drawdown: 0 }];
+    }
 
     let peak = equityData[0].equity;
     return equityData.map((point) => {
       if (point.equity > peak) peak = point.equity;
-      const drawdown = ((point.equity - peak) / peak) * 100;
+      // Avoid division by zero
+      const drawdown = peak !== 0 ? ((point.equity - peak) / peak) * 100 : 0;
       return { date: point.date, drawdown: drawdown };
     });
   }, [equityData]);
 
   // Calculate win/loss by period
   const winLossData = useMemo(() => {
-    if (filteredTrades.length === 0) return [];
+    if (filteredTrades.length === 0) {
+      return [{ date: "No data", wins: 0, losses: 0 }];
+    }
 
     const getDateKey = (date: Date) => {
       if (timeRange === "day") {

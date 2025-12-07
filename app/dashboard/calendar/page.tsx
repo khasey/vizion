@@ -5,13 +5,27 @@ import CalendarMonth from "@/components/calendar/CalendarMonth";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Button } from "@heroui/button";
 import NextLink from "next/link";
-import { useState, useMemo } from "react";
-import { readDayTrades } from "@/components/calendar/helpers";
+import { useState, useMemo, useEffect } from "react";
+import { getTrades } from "@/app/actions/trades";
+import type { Trade } from "@/types/trades";
 
 export default function CalendarPage() {
   const now = new Date();
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
+  const [allTrades, setAllTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTrades() {
+      const result = await getTrades();
+      if (result.data) {
+        setAllTrades(result.data);
+      }
+      setLoading(false);
+    }
+    fetchTrades();
+  }, []);
 
   // Calculate monthly statistics
   const monthlyStats = useMemo(() => {
@@ -23,26 +37,35 @@ export default function CalendarPage() {
     let bestDay = { date: "", pnl: -Infinity };
     let worstDay = { date: "", pnl: Infinity };
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const trades = readDayTrades(date);
-      
-      if (trades.length > 0) {
-        const dayPnL = trades.reduce((sum, t) => sum + t.pnl, 0);
-        totalTrades += trades.length;
-        totalPnL += dayPnL;
-        
-        if (dayPnL > 0) winningDays++;
-        if (dayPnL < 0) losingDays++;
-        
-        if (dayPnL > bestDay.pnl) {
-          bestDay = { date, pnl: dayPnL };
+    // Group trades by day
+    const tradesByDay: Record<string, Trade[]> = {};
+    allTrades.forEach(trade => {
+      const tradeDate = new Date(trade.trade_date);
+      if (tradeDate.getFullYear() === currentYear && tradeDate.getMonth() === currentMonth) {
+        const dateKey = trade.trade_date.split('T')[0]; // YYYY-MM-DD
+        if (!tradesByDay[dateKey]) {
+          tradesByDay[dateKey] = [];
         }
-        if (dayPnL < worstDay.pnl) {
-          worstDay = { date, pnl: dayPnL };
-        }
+        tradesByDay[dateKey].push(trade);
       }
-    }
+    });
+
+    // Calculate stats for each day
+    Object.entries(tradesByDay).forEach(([date, trades]) => {
+      const dayPnL = trades.reduce((sum: number, t: Trade) => sum + t.profit_loss, 0);
+      totalTrades += trades.length;
+      totalPnL += dayPnL;
+      
+      if (dayPnL > 0) winningDays++;
+      if (dayPnL < 0) losingDays++;
+      
+      if (dayPnL > bestDay.pnl) {
+        bestDay = { date, pnl: dayPnL };
+      }
+      if (dayPnL < worstDay.pnl) {
+        worstDay = { date, pnl: dayPnL };
+      }
+    });
 
     const tradingDays = winningDays + losingDays;
     const winRate = tradingDays > 0 ? ((winningDays / tradingDays) * 100).toFixed(1) : "0.0";
@@ -57,7 +80,7 @@ export default function CalendarPage() {
       bestDay,
       worstDay,
     };
-  }, [currentYear, currentMonth]);
+  }, [currentYear, currentMonth, allTrades]);
 
   return (
     <>
@@ -183,6 +206,7 @@ export default function CalendarPage() {
             <CalendarMonth 
               year={currentYear} 
               month={currentMonth}
+              trades={allTrades}
               onMonthChange={(year, month) => {
                 setCurrentYear(year);
                 setCurrentMonth(month);

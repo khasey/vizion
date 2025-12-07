@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
-import type { Setup } from "@/components/analytics/types";
-import { simulateTradesForSetup } from "@/components/analytics/helpers";
+import type { StrategyStats } from "@/types/strategies";
 
 type Row = {
   id: string;
@@ -18,32 +17,27 @@ type Row = {
   worstTrade: number;
 };
 
-function computeRow(setup: Setup): Row {
-  const trades = simulateTradesForSetup(setup, 50);
-  const wins = trades.filter((t: any) => t.pnl > 0);
-  const losses = trades.filter((t: any) => t.pnl <= 0);
-  const winRate = trades.length ? wins.length / trades.length : 0;
-  const profitFactor = (wins.reduce((s: number, t: any) => s + t.pnl, 0)) / Math.max(1e-6, Math.abs(losses.reduce((s: number, t: any) => s + t.pnl, 0)));
-  const averageRR = trades.length ? trades.reduce((s: number, t: any) => s + t.rr, 0) / trades.length : 0;
-  const pnl = trades.reduce((s: number, t: any) => s + t.pnl, 0);
-  const bestTrade = Math.max(...trades.map((t: any) => t.pnl));
-  const worstTrade = Math.min(...trades.map((t: any) => t.pnl));
+function computeRow(strategy: StrategyStats): Row {
+  const winningPnl = strategy.total_pnl > 0 ? strategy.total_pnl : 0;
+  const losingPnl = Math.abs(strategy.total_pnl < 0 ? strategy.total_pnl : 0);
+  const profitFactor = losingPnl > 0 ? winningPnl / losingPnl : winningPnl > 0 ? 999 : 0;
+  
   return {
-    id: setup.id,
-    name: setup.name,
-    color: setup.color,
-    winRate,
+    id: strategy.id,
+    name: strategy.name,
+    color: strategy.color,
+    winRate: strategy.win_rate / 100,
     profitFactor: isFinite(profitFactor) ? profitFactor : 0,
-    averageRR,
-    pnl,
-    trades: trades.length,
-    bestTrade,
-    worstTrade,
+    averageRR: strategy.avg_rr,
+    pnl: strategy.total_pnl,
+    trades: strategy.total_trades,
+    bestTrade: 0, // Would need individual trade data
+    worstTrade: 0, // Would need individual trade data
   };
 }
 
-export function SetupsLeaderboard({ setups }: { setups: Setup[] }) {
-  const rows = useMemo(() => setups.map(s => computeRow(s)), [setups]);
+export function SetupsLeaderboard({ strategies }: { strategies: StrategyStats[] }) {
+  const rows = useMemo(() => strategies.map(s => computeRow(s)), [strategies]);
   const [sortKey, setSortKey] = useState<keyof Row>("winRate");
   const [reverse, setReverse] = useState(true);
 

@@ -60,7 +60,7 @@ export default function Home() {
         </h2>
 
         {/* Carrousel infini avec fondu sur les côtés */}
-        <div className="relative max-w-6xl overflow-hidden border rounded-3xl border-divider py-8">
+        <div className="relative max-w-6xl overflow-hidden rounded-3xl border-divider py-8">
           {/* Gradient de gauche */}
           <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
 

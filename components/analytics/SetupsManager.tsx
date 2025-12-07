@@ -2,40 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-import type { Setup } from "@/components/analytics/types";
+import { getStrategies, createStrategy, updateStrategy, deleteStrategy } from "@/app/actions/strategies";
+import type { Strategy } from "@/types/strategies";
 
-function uuidv4() {
-  return Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(4);
-}
-
-// Using shared Setup type from types.ts
-
-const STORAGE_KEY = "vizion:setups";
-
-function readFromStorage(): Setup[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Setup[];
-  } catch (e) {
-    return [];
-  }
-}
-
-function writeToStorage(setups: Setup[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(setups));
-  } catch (e) {
-    // ignore
-  }
-}
-
-export function SetupsManager({ onChange }: { onChange?: (setups: Setup[]) => void }) {
-  const [setups, setSetups] = useState<Setup[]>([]);
-  const [editing, setEditing] = useState<Setup | null>(null);
+export function SetupsManager({ onChange }: { onChange?: () => void }) {
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<Strategy | null>(null);
   const [name, setName] = useState("");
   const [color, setColor] = useState("#00b4d8");
   const [description, setDescription] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const presets = [
     { name: "Momentum", color: "#f97316" },
     { name: "OPR", color: "#06b6d4" },
@@ -44,28 +21,29 @@ export function SetupsManager({ onChange }: { onChange?: (setups: Setup[]) => vo
   ];
 
   useEffect(() => {
-    setSetups(readFromStorage());
+    fetchStrategies();
   }, []);
 
-  useEffect(() => {
-    if (onChange) onChange(setups);
-  }, [setups, onChange]);
-
-  useEffect(() => {
-    writeToStorage(setups);
-  }, [setups]);
+  async function fetchStrategies() {
+    setLoading(true);
+    const result = await getStrategies();
+    if (result.data) {
+      setStrategies(result.data);
+    }
+    setLoading(false);
+  }
 
   function startNew() {
-    setEditing({ id: uuidv4(), name: "", color: "#00b4d8", description: "" });
+    setEditing({ name: "", color: "#00b4d8", description: "", user_id: "" });
     setName("");
     setColor("#00b4d8");
     setDescription("");
   }
 
-  function startEdit(s: Setup) {
+  function startEdit(s: Strategy) {
     setEditing(s);
     setName(s.name);
-    setColor(s.color);
+    setColor(s.color || "#00b4d8");
     setDescription(s.description ?? "");
   }
 
@@ -74,26 +52,58 @@ export function SetupsManager({ onChange }: { onChange?: (setups: Setup[]) => vo
     setName("");
     setColor("#00b4d8");
     setDescription("");
+    setError(null);
   }
 
-  function save() {
+  async function save() {
     if (!name.trim()) return;
-    const s: Setup = { id: editing?.id ?? uuidv4(), name: name.trim(), color, description: description.trim() };
-    setSetups(prev => {
-      const found = prev.find(p => p.id === s.id);
-      let next: Setup[];
-      if (found) {
-        next = prev.map(p => (p.id === s.id ? s : p));
-      } else {
-        next = [s, ...prev].slice(0, 10);
+    setError(null);
+    
+    if (editing?.id) {
+      // Update existing
+      const result = await updateStrategy(editing.id, {
+        name: name.trim(),
+        color,
+        description: description.trim() || null,
+      });
+      if (result.error) {
+        if (result.error.includes("duplicate key")) {
+          setError("A strategy with this name already exists");
+        } else {
+          setError(result.error);
+        }
+        return;
       }
-      return next;
-    });
+    } else {
+      // Create new
+      const result = await createStrategy({
+        name: name.trim(),
+        color,
+        description: description.trim() || null,
+      });
+      if (result.error) {
+        if (result.error.includes("duplicate key")) {
+          setError("A strategy with this name already exists");
+        } else {
+          setError(result.error);
+        }
+        return;
+      }
+    }
+    
+    await fetchStrategies();
     cancelEdit();
+    if (onChange) onChange();
   }
 
-  function remove(id: string) {
-    setSetups(prev => prev.filter(p => p.id !== id));
+  async function remove(id: string) {
+    const result = await deleteStrategy(id);
+    if (result.error) {
+      console.error("Error deleting strategy:", result.error);
+      return;
+    }
+    await fetchStrategies();
+    if (onChange) onChange();
   }
 
   return (
@@ -103,41 +113,50 @@ export function SetupsManager({ onChange }: { onChange?: (setups: Setup[]) => vo
           <Icon icon="mdi:tools" className="text-xl" /> Setups
         </h2>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-default-600">{setups.length}/10</span>
+          <span className="text-sm text-default-600">{strategies.length}</span>
           <button
             className={`rounded-md px-3 py-1.5 text-sm font-medium border border-divider bg-white dark:bg-black hover:bg-default-50 disabled:opacity-60`}
             onClick={startNew}
-            disabled={setups.length >= 10}
+            disabled={loading}
           >
             Create setup
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {setups.map(s => (
-          <div key={s.id} className="rounded-lg border border-divider bg-white dark:bg-black p-4 flex items-start gap-4">
-            <div className="w-3 h-10 rounded-sm" style={{ background: s.color }} />
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <div className="font-semibold">{s.name}</div>
-                <div className="flex items-center gap-2">
-                  <button className="text-default-600 hover:text-primary text-sm" onClick={() => startEdit(s)}>
-                    Edit
-                  </button>
-                  <button className="text-default-600 hover:text-destructive text-sm" onClick={() => remove(s.id)}>
-                    Delete
-                  </button>
+      {loading ? (
+        <div className="text-center py-8 text-default-600">Loading strategies...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {strategies.map(s => (
+            <div key={s.id} className="rounded-lg border border-divider bg-white dark:bg-black p-4 flex items-start gap-4">
+              <div className="w-3 h-10 rounded-sm" style={{ background: s.color || "#3b82f6" }} />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-semibold">{s.name}</div>
+                  <div className="flex items-center gap-2">
+                    <button className="text-default-600 hover:text-primary text-sm" onClick={() => startEdit(s)}>
+                      Edit
+                    </button>
+                    <button className="text-default-600 hover:text-destructive text-sm" onClick={() => s.id && remove(s.id)}>
+                      Delete
+                    </button>
+                  </div>
                 </div>
+                {s.description && <div className="text-default-600 text-sm">{s.description}</div>}
               </div>
-              {s.description && <div className="text-default-600 text-sm">{s.description}</div>}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {editing && (
         <div className="rounded-lg border border-divider bg-white dark:bg-black p-4">
+          {error && (
+            <div className="mb-4 p-3 bg-danger/10 border border-danger rounded-md text-danger text-sm">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-default-700 dark:text-default-300">Name</label>
@@ -169,7 +188,7 @@ export function SetupsManager({ onChange }: { onChange?: (setups: Setup[]) => vo
               key={p.name}
               className="rounded-md p-2 text-sm border border-divider flex items-center gap-2 hover:bg-default-50"
               onClick={() => {
-                setEditing({ id: uuidv4(), name: p.name, color: p.color, description: "" });
+                setEditing({ name: p.name, color: p.color, description: "", user_id: "" });
                 setName(p.name);
                 setColor(p.color);
                 setDescription("");

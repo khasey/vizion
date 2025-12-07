@@ -5,31 +5,29 @@ import SetupsManager from "@/components/analytics/SetupsManager";
 import SetupsLeaderboard from "@/components/analytics/SetupsLeaderboard";
 import TimeOfDayHeatmap from "@/components/analytics/TimeOfDayHeatmap";
 import { useEffect, useState } from "react";
-import type { Setup } from "@/components/analytics/types";
+import type { Strategy, StrategyStats } from "@/types/strategies";
+import { getStrategyStats } from "@/app/actions/strategies";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Button } from "@heroui/button";
 import NextLink from "next/link";
 
 export default function SetupsPage() {
-  const [setups, setSetups] = useState<Setup[]>([]);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
+  const [strategyStats, setStrategyStats] = useState<StrategyStats[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("vizion:setups");
-      if (raw) setSetups(JSON.parse(raw));
-    } catch (e) {
-      setSetups([]);
-    }
+    fetchStrategyStats();
   }, []);
 
-  // Mock data for setup statistics - in real app, this would come from actual trade data
-  const setupStats = setups.map((setup) => ({
-    ...setup,
-    trades: Math.floor(Math.random() * 50) + 10,
-    winRate: Math.floor(Math.random() * 40) + 50,
-    avgRR: (Math.random() * 2 + 1).toFixed(1),
-    totalPnL: Math.floor(Math.random() * 5000) - 1000,
-  }));
+  async function fetchStrategyStats() {
+    setLoading(true);
+    const result = await getStrategyStats();
+    if (result.data) {
+      setStrategyStats(result.data);
+    }
+    setLoading(false);
+  }
 
   return (
     <>
@@ -65,31 +63,31 @@ export default function SetupsPage() {
             {
               icon: "mdi:strategy",
               label: "Total Setups",
-              value: setups.length.toString(),
-              subtext: "Active configurations",
+              value: strategyStats.length.toString(),
+              subtext: "Active strategies",
             },
             {
               icon: "mdi:trophy",
               label: "Best Win Rate",
-              value: setupStats.length > 0 
-                ? `${Math.max(...setupStats.map(s => s.winRate))}%`
+              value: strategyStats.length > 0 
+                ? `${Math.max(...strategyStats.map(s => s.win_rate)).toFixed(0)}%`
                 : "N/A",
-              subtext: setupStats.length > 0
-                ? setupStats.reduce((a, b) => a.winRate > b.winRate ? a : b).name
+              subtext: strategyStats.length > 0
+                ? strategyStats.reduce((a, b) => a.win_rate > b.win_rate ? a : b).name
                 : "No setups yet",
             },
             {
               icon: "mdi:chart-line",
               label: "Avg R-Multiple",
-              value: setupStats.length > 0
-                ? `${(setupStats.reduce((sum, s) => sum + parseFloat(s.avgRR), 0) / setupStats.length).toFixed(1)}R`
+              value: strategyStats.length > 0
+                ? `${(strategyStats.reduce((sum, s) => sum + s.avg_rr, 0) / strategyStats.length).toFixed(1)}R`
                 : "N/A",
               subtext: "Across all setups",
             },
             {
               icon: "mdi:swap-horizontal",
               label: "Total Trades",
-              value: setupStats.reduce((sum, s) => sum + s.trades, 0).toString(),
+              value: strategyStats.reduce((sum, s) => sum + s.total_trades, 0).toString(),
               subtext: "Using setups",
             },
           ].map((stat, index) => (
@@ -137,7 +135,7 @@ export default function SetupsPage() {
                 inactiveZone={0.01}
               />
               <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                <SetupsManager onChange={(s) => setSetups(s)} />
+                <SetupsManager onChange={() => fetchStrategyStats()} />
               </div>
             </div>
           </div>
@@ -153,14 +151,14 @@ export default function SetupsPage() {
                 inactiveZone={0.01}
               />
               <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                <SetupsLeaderboard setups={setups} />
+                <SetupsLeaderboard strategies={strategyStats} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Setup Performance Cards */}
-        {setupStats.length > 0 && (
+        {strategyStats.length > 0 && (
           <div>
             <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
               <GlowingEffect
@@ -178,23 +176,23 @@ export default function SetupsPage() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {setupStats.map((setup) => (
+                  {strategyStats.map((strategy) => (
                     <div
-                      key={setup.id}
+                      key={strategy.id}
                       className="rounded-lg border border-divider p-4 hover:bg-default-50 dark:hover:bg-default-900 transition-colors"
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <div
                           className="w-1 h-16 rounded-full"
-                          style={{ backgroundColor: setup.color }}
+                          style={{ backgroundColor: strategy.color }}
                         />
                         <div className="flex-1">
                           <h4 className="font-semibold text-lg mb-1">
-                            {setup.name}
+                            {strategy.name}
                           </h4>
-                          {setup.description && (
+                          {strategy.description && (
                             <p className="text-xs text-default-600">
-                              {setup.description}
+                              {strategy.description}
                             </p>
                           )}
                         </div>
@@ -204,21 +202,21 @@ export default function SetupsPage() {
                           <p className="text-xs text-default-600 mb-1">
                             Trades
                           </p>
-                          <p className="text-lg font-bold">{setup.trades}</p>
+                          <p className="text-lg font-bold">{strategy.total_trades}</p>
                         </div>
                         <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
                           <p className="text-xs text-default-600 mb-1">
                             Win Rate
                           </p>
                           <p className="text-lg font-bold text-success">
-                            {setup.winRate}%
+                            {strategy.win_rate.toFixed(0)}%
                           </p>
                         </div>
                         <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
                           <p className="text-xs text-default-600 mb-1">
                             Avg R/R
                           </p>
-                          <p className="text-lg font-bold">{setup.avgRR}R</p>
+                          <p className="text-lg font-bold">{strategy.avg_rr.toFixed(1)}R</p>
                         </div>
                         <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
                           <p className="text-xs text-default-600 mb-1">
@@ -226,13 +224,13 @@ export default function SetupsPage() {
                           </p>
                           <p
                             className={`text-lg font-bold ${
-                              setup.totalPnL >= 0
+                              strategy.total_pnl >= 0
                                 ? "text-success"
                                 : "text-danger"
                             }`}
                           >
-                            ${setup.totalPnL >= 0 ? "+" : ""}
-                            {setup.totalPnL}
+                            ${strategy.total_pnl >= 0 ? "+" : ""}
+                            {strategy.total_pnl.toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -255,13 +253,13 @@ export default function SetupsPage() {
               inactiveZone={0.01}
             />
             <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-              <TimeOfDayHeatmap setups={setups} />
+              <TimeOfDayHeatmap setups={strategies} />
             </div>
           </div>
         </div>
 
         {/* Empty State */}
-        {setups.length === 0 && (
+        {!loading && strategyStats.length === 0 && (
           <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
             <GlowingEffect
               spread={40}
