@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
   const [allTrades, setAllTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [curveView, setCurveView] = useState<'equity' | 'pnl' | 'both'>('both');
 
   useEffect(() => {
     async function fetchTrades() {
@@ -299,34 +300,72 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Equity Curve & Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Equity Curve */}
-          <div className="lg:col-span-2 min-h-[400px]">
-            <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+        {/* Equity Curve */}
+        <div className="min-h-[400px]">
+          <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+            <GlowingEffect
+              spread={40}
+              glow={true}
+              disabled={false}
+              proximity={64}
+              inactiveZone={0.01}
+            />
+            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <h3 className="text-xl font-bold">Performance Overview</h3>
                     <p className="text-sm text-default-600">
-                      Last 20 trades - Equity & PnL
+                      Last 20 trades
                     </p>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                      <span className="text-default-600">Equity Curve</span>
+                  <div className="flex items-center gap-3">
+                    {/* Radio buttons for curve selection */}
+                    <div className="flex items-center gap-2 bg-default-100 dark:bg-default-50/10 rounded-lg p-1">
+                      <button
+                        onClick={() => setCurveView('equity')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                          curveView === 'equity'
+                            ? 'bg-blue-500 text-white shadow-sm'
+                            : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
+                        }`}
+                      >
+                        Equity
+                      </button>
+                      <button
+                        onClick={() => setCurveView('pnl')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                          curveView === 'pnl'
+                            ? 'bg-green-500 text-white shadow-sm'
+                            : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
+                        }`}
+                      >
+                        Trade PnL
+                      </button>
+                      <button
+                        onClick={() => setCurveView('both')}
+                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                          curveView === 'both'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
+                        }`}
+                      >
+                        Both
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                      <span className="text-default-600">Trade PnL</span>
+                    {/* Legend */}
+                    <div className="flex items-center gap-4 text-sm">
+                      {(curveView === 'equity' || curveView === 'both') && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                          <span className="text-default-600">Equity</span>
+                        </div>
+                      )}
+                      {(curveView === 'pnl' || curveView === 'both') && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                          <span className="text-default-600">PnL</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -374,41 +413,94 @@ export default function DashboardPage() {
                         strokeWidth="0.5"
                         className="text-default-300 dark:text-default-700"
                       />
-                      {/* Equity curve line */}
-                      <polyline
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        points={equityCurveData
-                          .map((d, i) => {
-                            const x = (i / (equityCurveData.length - 1)) * 400;
-                            const y =
-                              200 - ((d.equity - minValue) / range) * 200;
-                            return `${x},${y}`;
-                          })
-                          .join(" ")}
-                      />
-                      {/* PnL bars */}
-                      {equityCurveData.map((d, i) => {
+                      {/* Equity curve line - connecting all trade points */}
+                      {(curveView === 'equity' || curveView === 'both') && (
+                        <polyline
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))' }}
+                          points={equityCurveData
+                            .map((d, i) => {
+                              const x = (i / (equityCurveData.length - 1)) * 400;
+                              const y = 200 - ((d.equity - minValue) / range) * 200;
+                              return `${x},${y}`;
+                            })
+                            .join(" ")}
+                        />
+                      )}
+                      {/* PnL curve line - connecting all trade PnL points */}
+                      {(curveView === 'pnl' || curveView === 'both') && (
+                        <polyline
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ filter: 'drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3))' }}
+                          points={equityCurveData
+                            .map((d, i) => {
+                              const x = (i / (equityCurveData.length - 1)) * 400;
+                              const y = 200 - ((d.pnl - minValue) / range) * 200;
+                              return `${x},${y}`;
+                            })
+                            .join(" ")}
+                        />
+                      )}
+                      {/* Trade points on equity line */}
+                      {(curveView === 'equity' || curveView === 'both') && equityCurveData.map((d, i) => {
                         const x = (i / (equityCurveData.length - 1)) * 400;
-                        const barWidth = 400 / equityCurveData.length * 0.6;
-                        const zeroY = 200 - ((0 - minValue) / range) * 200;
-                        const pnlY = 200 - ((d.pnl - minValue) / range) * 200;
-                        const barHeight = Math.abs(zeroY - pnlY);
-                        const barY = d.pnl >= 0 ? pnlY : zeroY;
+                        const y = 200 - ((d.equity - minValue) / range) * 200;
                         
                         return (
-                          <rect
-                            key={i}
-                            x={x - barWidth / 2}
-                            y={barY}
-                            width={barWidth}
-                            height={barHeight}
-                            fill={d.pnl >= 0 ? "#22c55e" : "#ef4444"}
-                            opacity="0.6"
-                          />
+                          <g key={`equity-point-${i}`}>
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="1"
+                              fill="#3b82f6"
+                              opacity="0.2"
+                            />
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="1"
+                              fill="#3b82f6"
+                              stroke="white"
+                              strokeWidth="1"
+                              style={{ cursor: 'pointer' }}
+                              className="hover:r-4 transition-all"
+                            />
+                          </g>
+                        );
+                      })}
+                      {/* Trade points on PnL line */}
+                      {(curveView === 'pnl' || curveView === 'both') && equityCurveData.map((d, i) => {
+                        const x = (i / (equityCurveData.length - 1)) * 400;
+                        const y = 200 - ((d.pnl - minValue) / range) * 200;
+                        
+                        return (
+                          <g key={`pnl-point-${i}`}>
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="1"
+                              fill="#22c55e"
+                              opacity="0.2"
+                            />
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="1"
+                              fill="#22c55e"
+                              stroke="white"
+                              strokeWidth="1"
+                              style={{ cursor: 'pointer' }}
+                              className="hover:r-4 transition-all"
+                            />
+                          </g>
                         );
                       })}
                       {/* Gradient fill under curve */}
@@ -438,25 +530,56 @@ export default function DashboardPage() {
                         >
                           <stop
                             offset="0%"
-                            style={{ stopColor: "#22c55e", stopOpacity: 0.2 }}
+                            style={{ stopColor: "#3b82f6", stopOpacity: 0.3 }}
                           />
                           <stop
                             offset="100%"
                             style={{ stopColor: "#3b82f6", stopOpacity: 0 }}
                           />
                         </linearGradient>
+                        <linearGradient
+                          id="pnlAreaGradient"
+                          x1="0%"
+                          y1="0%"
+                          x2="0%"
+                          y2="100%"
+                        >
+                          <stop
+                            offset="0%"
+                            style={{ stopColor: "#22c55e", stopOpacity: 0.2 }}
+                          />
+                          <stop
+                            offset="100%"
+                            style={{ stopColor: "#22c55e", stopOpacity: 0 }}
+                          />
+                        </linearGradient>
                       </defs>
-                      <polygon
-                        fill="url(#areaGradient)"
-                        points={`0,200 ${equityCurveData
-                          .map((d, i) => {
-                            const x = (i / (equityCurveData.length - 1)) * 400;
-                            const y =
-                              200 - ((d.equity - minValue) / range) * 200;
-                            return `${x},${y}`;
-                          })
-                          .join(" ")} 400,200`}
-                      />
+                      {/* Area fill under equity curve */}
+                      {(curveView === 'equity' || curveView === 'both') && (
+                        <polygon
+                          fill="url(#areaGradient)"
+                          points={`0,200 ${equityCurveData
+                            .map((d, i) => {
+                              const x = (i / (equityCurveData.length - 1)) * 400;
+                              const y = 200 - ((d.equity - minValue) / range) * 200;
+                              return `${x},${y}`;
+                            })
+                            .join(" ")} 400,200`}
+                        />
+                      )}
+                      {/* Area fill under PnL curve */}
+                      {(curveView === 'pnl' || curveView === 'both') && (
+                        <polygon
+                          fill="url(#pnlAreaGradient)"
+                          points={`0,200 ${equityCurveData
+                            .map((d, i) => {
+                              const x = (i / (equityCurveData.length - 1)) * 400;
+                              const y = 200 - ((d.pnl - minValue) / range) * 200;
+                              return `${x},${y}`;
+                            })
+                            .join(" ")} 400,200`}
+                        />
+                      )}
                     </svg>
                   </div>
                   {/* X-axis labels */}
@@ -464,67 +587,6 @@ export default function DashboardPage() {
                     <span>Day 1</span>
                     <span>Day 10</span>
                     <span>Day 20</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Trading Calendar */}
-          <div className="min-h-[400px]">
-            <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
-                <div>
-                  <h3 className="text-xl font-bold">November 2025</h3>
-                  <p className="text-sm text-default-600">Trading activity</p>
-                </div>
-                <div className="grid grid-cols-7 gap-2 text-center text-xs">
-                  {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
-                    <div key={i} className="font-semibold text-default-600">
-                      {day}
-                    </div>
-                  ))}
-                  {Array.from({ length: 30 }, (_, i) => {
-                    const isToday = i === 24;
-                    const hasProfit = [2, 5, 8, 11, 15, 18, 22, 24].includes(i);
-                    const hasLoss = [4, 9, 13, 20].includes(i);
-                    const isWeekend = i % 7 === 5 || i % 7 === 6;
-
-                    return (
-                      <div
-                        key={i}
-                        className={`aspect-square rounded-lg flex items-center justify-center text-xs font-medium transition-all cursor-pointer ${
-                          isToday
-                            ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2"
-                            : hasProfit
-                              ? "bg-success/20 text-success hover:bg-success/30"
-                              : hasLoss
-                                ? "bg-danger/20 text-danger hover:bg-danger/30"
-                                : isWeekend
-                                  ? "bg-default-100 dark:bg-default-800 text-default-400"
-                                  : "bg-default-100 dark:bg-default-800 hover:bg-default-200 dark:hover:bg-default-700"
-                        }`}
-                      >
-                        {i + 1}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between text-xs mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-success/20"></div>
-                    <span className="text-default-600">Profit</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded bg-danger/20"></div>
-                    <span className="text-default-600">Loss</span>
                   </div>
                 </div>
               </div>
@@ -737,7 +799,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </div>
     </>
   );
 }

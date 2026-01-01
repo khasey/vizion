@@ -100,7 +100,7 @@ export default function SetupsPage() {
                   proximity={64}
                   inactiveZone={0.01}
                 />
-                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-4 bg-white dark:bg-black border border-divider">
+                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-4 bg-white dark:bg-black">
                   <div className="flex items-center justify-between">
                     <div className="w-fit rounded-lg border border-gray-600 p-2">
                       <Icon
@@ -134,7 +134,7 @@ export default function SetupsPage() {
                 proximity={64}
                 inactiveZone={0.01}
               />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <SetupsManager onChange={() => fetchStrategyStats()} />
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function SetupsPage() {
                 proximity={64}
                 inactiveZone={0.01}
               />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <SetupsLeaderboard strategies={strategyStats} />
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function SetupsPage() {
                 proximity={64}
                 inactiveZone={0.01}
               />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold">Setup Performance</h3>
                   <p className="text-sm text-default-600">
@@ -179,7 +179,7 @@ export default function SetupsPage() {
                   {strategyStats.map((strategy) => (
                     <div
                       key={strategy.id}
-                      className="rounded-lg border border-divider p-4 hover:bg-default-50 dark:hover:bg-default-900 transition-colors"
+                      className="rounded-lg p-4 bg-default-50 dark:bg-default-900/50 hover:bg-default-100 dark:hover:bg-default-900 transition-colors"
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <div
@@ -252,7 +252,7 @@ export default function SetupsPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
               <TimeOfDayHeatmap setups={strategies} />
             </div>
           </div>
@@ -268,7 +268,7 @@ export default function SetupsPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-xl p-12 bg-white dark:bg-black border border-divider text-center">
+            <div className="relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-xl p-12 bg-white dark:bg-black text-center">
               <Icon
                 icon="mdi:strategy"
                 className="text-6xl text-default-400"

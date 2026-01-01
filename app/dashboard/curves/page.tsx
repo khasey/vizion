@@ -316,7 +316,7 @@ export default function CurvesPage() {
             proximity={64}
             inactiveZone={0.01}
           />
-          <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+          <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">
@@ -400,7 +400,7 @@ export default function CurvesPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">
                   <Icon
@@ -450,7 +450,7 @@ export default function CurvesPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">
                   <Icon
@@ -515,7 +515,7 @@ export default function CurvesPage() {
             proximity={64}
             inactiveZone={0.01}
           />
-          <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+          <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">

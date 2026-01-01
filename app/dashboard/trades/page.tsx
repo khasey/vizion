@@ -115,7 +115,7 @@ export default function TradesPage() {
                   proximity={64}
                   inactiveZone={0.01}
                 />
-                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-5 bg-white dark:bg-black border border-divider">
+                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-5 bg-white dark:bg-black">
                   <div className="w-fit rounded-lg border border-gray-600 p-2">
                     <Icon
                       icon={stat.icon}
@@ -143,7 +143,7 @@ export default function TradesPage() {
             proximity={64}
             inactiveZone={0.01}
           />
-          <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+          <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold">All Trades</h3>
             </div>
