@@ -144,7 +144,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="relative flex flex-col items-center gap-12 py-16 overflow-hidden rounded-3xl">
+      <section className="relative flex flex-col items-center gap-12 py-16 overflow-hidden">
         {/* Grid Background */}
         <div className="absolute -inset-20">
           <div
@@ -152,11 +152,11 @@ export default function Home() {
               "absolute inset-0",
               "[background-size:40px_40px]",
               "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",
-              "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+              "dark:[background-image:linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)]"
             )}
           />
           {/* Radial gradient for faded look */}
-          <div className="pointer-events-none absolute inset-0 bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_70%)] dark:bg-black"></div>
+          <div className="pointer-events-none absolute inset-0 bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_70%)] dark:bg-[#09090b]"></div>
         </div>
 
         {/* Content */}
