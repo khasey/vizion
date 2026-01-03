@@ -110,7 +110,7 @@ export default function DashboardPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6 mt-0 md:mt-0">
         <div>
           <h2 className="text-2xl font-bold">Trading Journal</h2>
           <p className="text-sm text-default-600">
@@ -301,7 +301,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Equity Curve */}
-        <div className="min-h-[400px]">
+        <div className="min-h-[300px] max-w-[800px]">
           <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
             <GlowingEffect
               spread={40}
@@ -595,9 +595,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Trades & Notes */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 p-6 gap-6">
           {/* Recent Trades */}
-          <div className="lg:col-span-2 min-h-[400px]">
+          <div className="lg:col-span-2 min-h-[400px] 
+          ">
             <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
               <GlowingEffect
                 spread={40}
@@ -710,7 +711,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Trade Notes & Quick Stats */}
-          <div className="min-h-[400px] space-y-6">
+          <div className="min-h-[400px] space-y-6 ">
             {/* Quick Actions */}
             <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
               <GlowingEffect

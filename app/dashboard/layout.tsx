@@ -187,8 +187,8 @@ export default function DashboardLayout({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto min-w-0">
-        <div className="md:hidden p-2"> 
+      <main className="flex-1 overflow-y-auto min-w-0 pt-0 md:pt-0">
+        <div className="md:hidden p-2 border-b border-divider"> 
           <Button isIconOnly variant="light" size="sm" onPress={() => setSidebarOpen(true)}>
             <Icon icon="mdi:menu" className="text-xl" />
           </Button>
