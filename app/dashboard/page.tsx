@@ -7,19 +7,26 @@ import { Button } from "@heroui/button";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Gauge } from "@/components/ui/gauge";
 import { getTrades } from "@/app/actions/trades";
+import { getStrategies } from "@/app/actions/strategies";
 import type { Trade } from "@/types/trades";
+import type { Strategy } from "@/types/strategies";
+import { Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import CircularRings from "@/components/CircularRings";
+import PieChart from "@/components/PieChart";
 
 export default function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
   const [allTrades, setAllTrades] = useState<Trade[]>([]);
+  const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
   const [curveView, setCurveView] = useState<'equity' | 'pnl' | 'both'>('both');
 
   useEffect(() => {
     async function fetchTrades() {
-      const [recentResult, allResult] = await Promise.all([
+      const [recentResult, allResult, strategiesResult] = await Promise.all([
         getTrades(5), // Last 5 trades for display
         getTrades(), // All trades for statistics
+        getStrategies(), // All strategies for setup names
       ]);
       
       if (recentResult.data) {
@@ -27,6 +34,9 @@ export default function DashboardPage() {
       }
       if (allResult.data) {
         setAllTrades(allResult.data);
+      }
+      if (strategiesResult.data) {
+        setStrategies(strategiesResult.data);
       }
       setLoading(false);
     }
@@ -106,6 +116,93 @@ export default function DashboardPage() {
   const maxValue = Math.max(maxEquity, maxPnL);
   const minValue = Math.min(minEquity, minPnL);
   const range = maxValue - minValue || 1000; // Prevent division by zero
+
+  // Prepare data for Donut Chart - Setup Distribution
+  const setupDistribution = allTrades.reduce((acc, trade) => {
+    const strategy = strategies.find(s => s.id === trade.strategy_id);
+    const setupName = strategy?.name || 'No Setup';
+    if (!acc[setupName]) {
+      acc[setupName] = { total: 0, winners: 0, losers: 0, pnl: 0 };
+    }
+    acc[setupName].total += 1;
+    if (trade.profit_loss > 0) {
+      acc[setupName].winners += 1;
+    } else if (trade.profit_loss < 0) {
+      acc[setupName].losers += 1;
+    }
+    acc[setupName].pnl += trade.profit_loss;
+    return acc;
+  }, {} as Record<string, { total: number; winners: number; losers: number; pnl: number }>);
+
+  const pieChartData = Object.entries(setupDistribution).map(([name, data]) => ({
+    name,
+    value: data.total,
+    winners: data.winners,
+    losers: data.losers,
+    pnl: data.pnl,
+  }));
+
+  // Prepare data for Direction Distribution (Long/Short)
+  const directionDistribution = allTrades.reduce((acc, trade) => {
+    const direction = (trade.side === 'long' || trade.side === 'buy') ? 'Long' : 'Short';
+    if (!acc[direction]) {
+      acc[direction] = { total: 0, winners: 0, losers: 0, pnl: 0 };
+    }
+    acc[direction].total += 1;
+    if (trade.profit_loss > 0) {
+      acc[direction].winners += 1;
+    } else if (trade.profit_loss < 0) {
+      acc[direction].losers += 1;
+    }
+    acc[direction].pnl += trade.profit_loss;
+    return acc;
+  }, {} as Record<string, { total: number; winners: number; losers: number; pnl: number }>);
+
+  const directionChartData = Object.entries(directionDistribution).map(([name, data]) => ({
+    name,
+    value: data.total,
+    winners: data.winners,
+    losers: data.losers,
+    pnl: data.pnl,
+  }));
+
+  const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+  const DIRECTION_COLORS = { 'Long': '#22c55e', 'Short': '#ef4444' };
+
+  // Prepare KPIs for Long/Short analysis
+  const longData = directionDistribution['Long'] || { total: 0, winners: 0, losers: 0, pnl: 0 };
+  const shortData = directionDistribution['Short'] || { total: 0, winners: 0, losers: 0, pnl: 0 };
+  
+  const directionKPIs = [
+    {
+      label: 'Long Win Rate',
+      value: longData.total > 0 ? (longData.winners / longData.total) * 100 : 0,
+      unit: '%',
+      icon: 'mdi:arrow-up-bold',
+      description: `${longData.winners}/${longData.total} trades`
+    },
+    {
+      label: 'Short Win Rate',
+      value: shortData.total > 0 ? (shortData.winners / shortData.total) * 100 : 0,
+      unit: '%',
+      icon: 'mdi:arrow-down-bold',
+      description: `${shortData.winners}/${shortData.total} trades`
+    },
+    {
+      label: 'Avg PnL Long',
+      value: longData.total > 0 ? Math.abs(longData.pnl / longData.total) : 0,
+      unit: '$',
+      icon: 'mdi:cash-plus',
+      description: `Total: ${longData.pnl >= 0 ? '+' : ''}${longData.pnl.toFixed(0)}$`
+    },
+    {
+      label: 'Avg PnL Short',
+      value: shortData.total > 0 ? Math.abs(shortData.pnl / shortData.total) : 0,
+      unit: '$',
+      icon: 'mdi:cash-minus',
+      description: `Total: ${shortData.pnl >= 0 ? '+' : ''}${shortData.pnl.toFixed(0)}$`
+    },
+  ];
 
   return (
     <>
@@ -300,30 +397,32 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Equity Curve */}
-        <div className="min-h-[300px] max-w-[800px]">
-          <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-            <GlowingEffect
-              spread={40}
-              glow={true}
-              disabled={false}
-              proximity={64}
-              inactiveZone={0.01}
-            />
-            <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
-                <div className="flex items-center justify-between mb-2">
+        {/* Performance Charts - Flex Container */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Equity Curve */}
+          <div className="min-h-[250px] max-h-[600px] flex-1">
+            <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+              <GlowingEffect
+                spread={40}
+                glow={true}
+                disabled={false}
+                proximity={64}
+                inactiveZone={0.01}
+              />
+              <div className="relative flex h-full flex-col gap-2 overflow-hidden rounded-xl p-4 bg-white dark:bg-black">
+                <div className="flex items-center justify-between mb-1">
                   <div>
-                    <h3 className="text-xl font-bold">Performance Overview</h3>
-                    <p className="text-sm text-default-600">
+                    <h3 className="text-lg font-bold">Performance Overview</h3>
+                    <p className="text-xs text-default-600">
                       Last 20 trades
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {/* Radio buttons for curve selection */}
-                    <div className="flex items-center gap-2 bg-default-100 dark:bg-default-50/10 rounded-lg p-1">
+                    <div className="flex items-center gap-1 bg-default-100 dark:bg-default-50/10 rounded-lg p-0.5">
                       <button
                         onClick={() => setCurveView('equity')}
-                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                        className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
                           curveView === 'equity'
                             ? 'bg-blue-500 text-white shadow-sm'
                             : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
@@ -333,7 +432,7 @@ export default function DashboardPage() {
                       </button>
                       <button
                         onClick={() => setCurveView('pnl')}
-                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                        className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
                           curveView === 'pnl'
                             ? 'bg-green-500 text-white shadow-sm'
                             : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
@@ -343,7 +442,7 @@ export default function DashboardPage() {
                       </button>
                       <button
                         onClick={() => setCurveView('both')}
-                        className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                        className={`px-2 py-0.5 text-[10px] font-medium rounded-md transition-all ${
                           curveView === 'both'
                             ? 'bg-primary text-white shadow-sm'
                             : 'text-default-600 dark:text-default-400 hover:text-default-900 dark:hover:text-default-200'
@@ -353,16 +452,16 @@ export default function DashboardPage() {
                       </button>
                     </div>
                     {/* Legend */}
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-2 text-[10px]">
                       {(curveView === 'equity' || curveView === 'both') && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                           <span className="text-default-600">Equity</span>
                         </div>
                       )}
                       {(curveView === 'pnl' || curveView === 'both') && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
                           <span className="text-default-600">PnL</span>
                         </div>
                       )}
@@ -371,7 +470,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 relative">
                   {/* Y-axis labels */}
-                  <div className="absolute left-0 top-0 bottom-8 w-16 flex flex-col justify-between text-xs text-default-600">
+                  <div className="absolute left-0 top-0 bottom-6 w-12 flex flex-col justify-between text-[10px] text-default-600">
                     <span>${(maxValue / 1000).toFixed(1)}k</span>
                     <span>
                       ${((maxValue + minValue) / 2000).toFixed(1)}k
@@ -379,10 +478,10 @@ export default function DashboardPage() {
                     <span>${(minValue / 1000).toFixed(1)}k</span>
                   </div>
                   {/* Chart area */}
-                  <div className="ml-16 h-full pb-8 relative">
+                  <div className="ml-12 h-full pb-6 relative">
                     <svg
                       className="w-full h-full"
-                      viewBox="0 0 400 200"
+                      viewBox="0 0 400 150"
                       preserveAspectRatio="none"
                     >
                       {/* Grid lines */}
@@ -392,25 +491,25 @@ export default function DashboardPage() {
                         x2="400"
                         y2="0"
                         stroke="currentColor"
-                        strokeWidth="0.5"
+                        strokeWidth="0.3"
                         className="text-default-300 dark:text-default-700"
                       />
                       <line
                         x1="0"
-                        y1="100"
+                        y1="75"
                         x2="400"
-                        y2="100"
+                        y2="75"
                         stroke="currentColor"
-                        strokeWidth="0.5"
+                        strokeWidth="0.3"
                         className="text-default-300 dark:text-default-700"
                       />
                       <line
                         x1="0"
-                        y1="200"
+                        y1="150"
                         x2="400"
-                        y2="200"
+                        y2="150"
                         stroke="currentColor"
-                        strokeWidth="0.5"
+                        strokeWidth="0.3"
                         className="text-default-300 dark:text-default-700"
                       />
                       {/* Equity curve line - connecting all trade points */}
@@ -418,14 +517,14 @@ export default function DashboardPage() {
                         <polyline
                           fill="none"
                           stroke="#3b82f6"
-                          strokeWidth="1.5"
+                          strokeWidth="1.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))' }}
+                          style={{ filter: 'drop-shadow(0 1px 3px rgba(59, 130, 246, 0.3))' }}
                           points={equityCurveData
                             .map((d, i) => {
                               const x = (i / (equityCurveData.length - 1)) * 400;
-                              const y = 200 - ((d.equity - minValue) / range) * 200;
+                              const y = 150 - ((d.equity - minValue) / range) * 150;
                               return `${x},${y}`;
                             })
                             .join(" ")}
@@ -436,14 +535,14 @@ export default function DashboardPage() {
                         <polyline
                           fill="none"
                           stroke="#22c55e"
-                          strokeWidth="1.5"
+                          strokeWidth="1.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          style={{ filter: 'drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3))' }}
+                          style={{ filter: 'drop-shadow(0 1px 3px rgba(34, 197, 94, 0.3))' }}
                           points={equityCurveData
                             .map((d, i) => {
                               const x = (i / (equityCurveData.length - 1)) * 400;
-                              const y = 200 - ((d.pnl - minValue) / range) * 200;
+                              const y = 150 - ((d.pnl - minValue) / range) * 150;
                               return `${x},${y}`;
                             })
                             .join(" ")}
@@ -452,26 +551,26 @@ export default function DashboardPage() {
                       {/* Trade points on equity line */}
                       {(curveView === 'equity' || curveView === 'both') && equityCurveData.map((d, i) => {
                         const x = (i / (equityCurveData.length - 1)) * 400;
-                        const y = 200 - ((d.equity - minValue) / range) * 200;
+                        const y = 150 - ((d.equity - minValue) / range) * 150;
                         
                         return (
                           <g key={`equity-point-${i}`}>
                             <circle
                               cx={x}
                               cy={y}
-                              r="1"
+                              r="0.8"
                               fill="#3b82f6"
                               opacity="0.2"
                             />
                             <circle
                               cx={x}
                               cy={y}
-                              r="1"
+                              r="0.8"
                               fill="#3b82f6"
                               stroke="white"
-                              strokeWidth="1"
+                              strokeWidth="0.8"
                               style={{ cursor: 'pointer' }}
-                              className="hover:r-4 transition-all"
+                              className="hover:r-3 transition-all"
                             />
                           </g>
                         );
@@ -479,26 +578,26 @@ export default function DashboardPage() {
                       {/* Trade points on PnL line */}
                       {(curveView === 'pnl' || curveView === 'both') && equityCurveData.map((d, i) => {
                         const x = (i / (equityCurveData.length - 1)) * 400;
-                        const y = 200 - ((d.pnl - minValue) / range) * 200;
+                        const y = 150 - ((d.pnl - minValue) / range) * 150;
                         
                         return (
                           <g key={`pnl-point-${i}`}>
                             <circle
                               cx={x}
                               cy={y}
-                              r="1"
+                              r="0.8"
                               fill="#22c55e"
                               opacity="0.2"
                             />
                             <circle
                               cx={x}
                               cy={y}
-                              r="1"
+                              r="0.8"
                               fill="#22c55e"
                               stroke="white"
-                              strokeWidth="1"
+                              strokeWidth="0.8"
                               style={{ cursor: 'pointer' }}
-                              className="hover:r-4 transition-all"
+                              className="hover:r-3 transition-all"
                             />
                           </g>
                         );
@@ -558,35 +657,104 @@ export default function DashboardPage() {
                       {(curveView === 'equity' || curveView === 'both') && (
                         <polygon
                           fill="url(#areaGradient)"
-                          points={`0,200 ${equityCurveData
+                          points={`0,150 ${equityCurveData
                             .map((d, i) => {
                               const x = (i / (equityCurveData.length - 1)) * 400;
-                              const y = 200 - ((d.equity - minValue) / range) * 200;
+                              const y = 150 - ((d.equity - minValue) / range) * 150;
                               return `${x},${y}`;
                             })
-                            .join(" ")} 400,200`}
+                            .join(" ")} 400,150`}
                         />
                       )}
                       {/* Area fill under PnL curve */}
                       {(curveView === 'pnl' || curveView === 'both') && (
                         <polygon
                           fill="url(#pnlAreaGradient)"
-                          points={`0,200 ${equityCurveData
+                          points={`0,150 ${equityCurveData
                             .map((d, i) => {
                               const x = (i / (equityCurveData.length - 1)) * 400;
-                              const y = 200 - ((d.pnl - minValue) / range) * 200;
+                              const y = 150 - ((d.pnl - minValue) / range) * 150;
                               return `${x},${y}`;
                             })
-                            .join(" ")} 400,200`}
+                            .join(" ")} 400,150`}
                         />
                       )}
                     </svg>
                   </div>
                   {/* X-axis labels */}
-                  <div className="absolute bottom-0 left-16 right-0 flex justify-between text-xs text-default-600">
+                  <div className="absolute bottom-0 left-12 right-0 flex justify-between text-[10px] text-default-600">
                     <span>Day 1</span>
                     <span>Day 10</span>
                     <span>Day 20</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Distribution Charts Column */}
+          <div className="w-full lg:w-[400px] flex flex-col gap-6">
+            {/* Trade Distribution by Setup */}
+            <div className="min-h-[300px]">
+              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="relative flex h-full flex-col gap-4 rounded-xl p-6 bg-white dark:bg-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="text-xl font-bold">By Setup</h3>
+                      <p className="text-sm text-default-600">
+                        Strategy distribution
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center min-h-[250px]">
+                    {allTrades.length === 0 ? (
+                      <div className="text-center text-default-600">
+                        <Icon icon="mdi:chart-pie" className="text-4xl mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No data to display</p>
+                      </div>
+                    ) : (
+                      <PieChart/>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trade Distribution by Direction */}
+            <div className="min-h-[300px]">
+              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="relative flex h-full flex-col gap-4 rounded-xl p-6 bg-white dark:bg-black">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="text-xl font-bold">By Direction</h3>
+                      <p className="text-sm text-default-600">
+                        Long vs Short
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center min-h-[250px]">
+                    {allTrades.length === 0 ? (
+                      <div className="text-center text-default-600">
+                        <Icon icon="mdi:chart-pie" className="text-4xl mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No data to display</p>
+                      </div>
+                    ) : (
+                      <CircularRings />
+                    )}
                   </div>
                 </div>
               </div>
@@ -709,97 +877,8 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-
-          {/* Trade Notes & Quick Stats */}
-          <div className="min-h-[400px] space-y-6 ">
-            {/* Quick Actions */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
-                <h3 className="text-xl font-bold">Quick Actions</h3>
-                <div className="space-y-3">
-                  <Button
-                    as={NextLink}
-                    href="/dashboard/trades/new"
-                    className="w-full justify-start"
-                    color="primary"
-                  >
-                    <Icon icon="mdi:plus" className="text-xl" />
-                    Add New Trade
-                  </Button>
-                  <Button
-                    as={NextLink}
-                    href="/dashboard/setups"
-                    className="w-full justify-start"
-                    variant="bordered"
-                  >
-                    <Icon icon="mdi:strategy" className="text-xl" />
-                    Manage Setups
-                  </Button>
-                  <Button
-                    as={NextLink}
-                    href="/dashboard/insights"
-                    className="w-full justify-start"
-                    variant="bordered"
-                  >
-                    <Icon icon="mdi:lightbulb" className="text-xl" />
-                    AI Insights
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Today's Notes */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold">Today's Notes</h3>
-                  <Button isIconOnly variant="light" size="sm">
-                    <Icon icon="mdi:pencil" className="text-lg" />
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-default-100 dark:bg-default-800">
-                    <p className="text-sm text-default-700 dark:text-default-300">
-                      Market showing strong bullish momentum on EUR/USD. Waiting
-                      for pullback to key support level.
-                    </p>
-                    <p className="text-xs text-default-500 mt-2">08:45 AM</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-default-100 dark:bg-default-800">
-                    <p className="text-sm text-default-700 dark:text-default-300">
-                      Took profit early on GBP/JPY - need to work on letting
-                      winners run.
-                    </p>
-                    <p className="text-xs text-default-500 mt-2">02:30 PM</p>
-                  </div>
-                </div>
-                <Button
-                  as={NextLink}
-                  href="/dashboard/journal"
-                  variant="light"
-                  size="sm"
-                  className="w-full"
-                >
-                  View All Notes
-                </Button>
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
     </>
   );
 }
