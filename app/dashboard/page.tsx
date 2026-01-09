@@ -16,6 +16,7 @@ import PerformanceStats from "@/components/PerformanceStats";
 import PerformanceOverview from "@/components/PerformanceOverview";
 import RecentTrades from "@/components/RecentTrades";
 import LongVsShort from "@/components/LongVsShort";
+import { FuturisticStrategyPieChart } from "@/components/ui/FuturisticStrategyPieChart";
 
 export default function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
@@ -237,29 +238,15 @@ export default function DashboardPage() {
 
           {/* Right column */}
           <div className="flex flex-col gap-6">
-            <div className="min-h-[300px]">
-              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
-                <div className="relative flex h-full flex-col gap-4 rounded-xl p-6 bg-white dark:bg-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h3 className="text-xl font-bold">By Setup</h3>
-                      <p className="text-sm text-default-600">Strategy distribution</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 flex items-center justify-center min-h-[250px]">
-                    {allTrades.length === 0 ? (
-                      <div className="text-center text-default-600">
-                        <Icon icon="mdi:chart-pie" className="text-4xl mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No data to display</p>
-                      </div>
-                    ) : (
-                      <PieChart />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            
+            <FuturisticStrategyPieChart
+              strategies={[
+                { name: "Breakout", count: 45, color: "#00ff88" },
+                { name: "Scalping", count: 32, color: "#ffd700" },
+                { name: "Swing", count: 28, color: "#ff3366" },
+                { name: "Range", count: 15, color: "#00d4ff" },
+              ]}
+            />
 
             <div className="min-h-[300px]">
               <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">

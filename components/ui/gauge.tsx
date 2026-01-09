@@ -3,21 +3,21 @@
 interface GaugeProps {
   value: number; // 0-100
   label?: string;
-  size?: number;
   showValue?: boolean;
+  winners?: number;
+  totalTrades?: number;
   colorStops?: Array<{ percent: number; color: string }>;
 }
 
 export function Gauge({
   value,
   label,
-  size = 120,
   showValue = true,
+  winners,
+  totalTrades,
   colorStops = [
-    { percent: 0, color: "#ef4444" },    // red
-    { percent: 25, color: "#f59e0b" },   // orange
-    { percent: 50, color: "#eab308" },   // yellow
-    { percent: 75, color: "#22c55e" },   // green
+    { percent: 0, color: "#3b82f6" },    // blue
+    { percent: 100, color: "#22c55e" },   // green
   ],
 }: GaugeProps) {
   const clampedValue = Math.max(0, Math.min(100, value));
@@ -66,9 +66,9 @@ export function Gauge({
     ].join(" ");
   };
 
-  const centerY = size / 2;
-  const radius = size / 2 - 10;
-  const centerX = size / 2;
+  const centerY = 25; // moitié de 50
+  const radius = 20; // 25 - 5 (marge)
+  const centerX = 50; // moitié de 100
   const needleLength = radius * 0.85;
 
   const getCurrentColor = (val: number) => {
@@ -87,7 +87,7 @@ export function Gauge({
   // Créer une aiguille en forme de flèche/triangle
   const createNeedle = () => {
     const tipPoint = polarToCartesian(centerX, centerY, needleLength, needleAngle);
-    const baseWidth = 6;
+    const baseWidth = 2;
     const tailLength = radius * 0.15;
     
     // Points de la base de l'aiguille (perpendiculaires à la direction)
@@ -106,8 +106,40 @@ export function Gauge({
   };
 
   return (
-    <div className="flex flex-col items-center w-full pb-2">
-      <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size * 0.65}`} preserveAspectRatio="xMidYMid meet" className="max-w-full">
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <svg 
+        width="100%" 
+        height="100%" 
+        viewBox="0 0 100 50" 
+        preserveAspectRatio="xMidYMid meet" 
+        className="w-full h-full"
+        style={{ maxHeight: '100%' }}
+      >
+        {/* Texte centré sur les pointillés */}
+        {showValue && (
+          <text
+            x="50"
+            y="25"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="text-xs font-bold fill-current text-default-600 dark:text-default-400"
+            style={{ fontSize: '3px' }}
+          >
+            {clampedValue.toFixed(0)}%
+          </text>
+        )}
+        {showValue && winners !== undefined && totalTrades !== undefined && (
+          <text
+            x="50"
+            y="30"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            className="text-xs fill-current text-default-500"
+            style={{ fontSize: '2px' }}
+          >
+            {winners}/{totalTrades} trades
+          </text>
+        )}
         <defs>
           <linearGradient id={`gauge-gradient-${label}`} x1="0%" y1="0%" x2="100%" y2="0%">
             {colorStops.map((stop, i) => (
@@ -147,7 +179,7 @@ export function Gauge({
           d={createArc(centerX, centerY, radius, startAngle, endAngle)}
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1"
           className="text-default-300 dark:text-default-700"
           strokeLinecap="round"
         />
@@ -157,7 +189,7 @@ export function Gauge({
           d={createArc(centerX, centerY, radius, startAngle, endAngle)}
           fill="none"
           stroke={`url(#gauge-gradient-${label})`}
-          strokeWidth="10"
+          strokeWidth="3"
           strokeLinecap="round"
           filter={`url(#glow-${label})`}
         />
@@ -169,9 +201,9 @@ export function Gauge({
             d={createArc(centerX, centerY, radius * f, startAngle, endAngle)}
             fill="none"
             stroke="currentColor"
-            strokeWidth="1"
+            strokeWidth="0.5"
             className="text-default-400 dark:text-default-600"
-            strokeDasharray="5 6"
+            strokeDasharray="2 3"
             opacity="0.4"
           />
         ))}
@@ -197,7 +229,7 @@ export function Gauge({
         <circle 
           cx={centerX} 
           cy={centerY} 
-          r="10" 
+          r="4" 
           fill="#9ca3af"
           filter={`url(#needle-shadow-${label})`}
           opacity="0.9"
@@ -205,30 +237,17 @@ export function Gauge({
         <circle 
           cx={centerX} 
           cy={centerY} 
-          r="7" 
+          r="2.5" 
           fill="url(#needle-gradient-${label})"
         />
         <circle 
           cx={centerX} 
           cy={centerY} 
-          r="3" 
+          r="1" 
           fill="white"
           opacity="0.9"
         />
       </svg>
-
-      {showValue && (
-        <div className="text-center mt-1">
-          <div className="text-3xl font-bold" style={{ color: currentColor }}>
-            {clampedValue.toFixed(0)}%
-          </div>
-          {label && (
-            <div className="text-sm text-default-600 dark:text-default-400 mt-1">
-              {label}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
