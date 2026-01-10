@@ -10,6 +10,7 @@ import { getStrategyStats } from "@/app/actions/strategies";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Button } from "@heroui/button";
 import NextLink from "next/link";
+import { FuturisticCard } from "@/components/ui/FuturisticCard";
 
 export default function SetupsPage() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
@@ -91,34 +92,14 @@ export default function SetupsPage() {
               subtext: "Using setups",
             },
           ].map((stat, index) => (
-            <div key={index} className="min-h-[120px]">
-              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-4 bg-white dark:bg-black">
-                  <div className="flex items-center justify-between">
-                    <div className="w-fit rounded-lg border border-gray-600 p-2">
-                      <Icon
-                        icon={stat.icon}
-                        className="text-xl text-black dark:text-neutral-400"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold mb-1">{stat.value}</h3>
-                    <p className="text-sm text-default-600 mb-0.5">
-                      {stat.label}
-                    </p>
-                    <p className="text-xs text-default-500">{stat.subtext}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <FuturisticCard
+              key={index}
+              title={stat.label}
+              value={stat.value}
+              change={stat.subtext}
+              icon={stat.icon}
+              isPositive={true}
+            />
           ))}
         </div>
 

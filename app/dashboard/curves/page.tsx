@@ -20,6 +20,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { FuturisticGlowingEffect } from "@/components/ui/FuturisticGlowingEffect";
 
 export default function CurvesPage() {
   const [timeRange, setTimeRange] = useState("day");
@@ -249,6 +250,32 @@ export default function CurvesPage() {
     { value: "year", label: "Année" },
   ];
 
+  {/* Effet vert néon par défaut */}
+// {/* <FuturisticGlowingEffect
+//   spread={40}
+//   glow={true}
+//   disabled={false}
+//   proximity={64}
+//   inactiveZone={0.01}
+// />
+
+// {/* Effet cyan pour cards informatives */}
+// <FuturisticGlowingEffect
+//   variant="cyan"
+//   spread={40}
+//   glow={true}
+//   disabled={false}
+//   proximity={64}
+// />
+
+// {/* Effet rouge pour drawdown cards */}
+// <FuturisticGlowingEffect
+//   variant="red"
+//   spread={40}
+//   glow={true}
+//   disabled={false}
+//   proximity={64}
+// /> */}
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header */}
@@ -309,13 +336,14 @@ export default function CurvesPage() {
       {/* Equity Curve */}
       <div className="min-h-[400px]">
         <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
-            spread={40}
-            glow={true}
-            disabled={false}
-            proximity={64}
-            inactiveZone={0.01}
-          />
+           <FuturisticGlowingEffect
+           spread={40}
+           variant="red"
+   glow={true}
+   disabled={false}
+   proximity={64}
+  inactiveZone={0.01}
+/>
           <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">

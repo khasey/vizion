@@ -1,4 +1,5 @@
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { FuturisticGlowingEffect } from "./ui/FuturisticGlowingEffect";
 
 interface PerformanceOverviewProps {
   equityCurveData: { day: number; equity: number; pnl: number }[];
@@ -18,15 +19,16 @@ export default function PerformanceOverview({
   setCurveView,
 }: PerformanceOverviewProps) {
   return (
-    <div className="min-h-[250px] max-h-[600px]">
+    <div className="h-full">
       <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-        <GlowingEffect
-          spread={40}
-          glow={true}
-          disabled={false}
-          proximity={64}
-          inactiveZone={0.01}
-        />
+        <FuturisticGlowingEffect
+           spread={40}
+          //  variant="green"
+            glow={true}
+            disabled={false}
+            proximity={64}
+            inactiveZone={0.01}
+          />
         <div className="relative flex h-full flex-col gap-2 overflow-hidden rounded-xl p-4 bg-white dark:bg-black">
           <div className="flex items-center justify-between mb-1">
             <div>
@@ -90,7 +92,7 @@ export default function PerformanceOverview({
               <span>${(minValue / 1000).toFixed(1)}k</span>
             </div>
             <div className="ml-12 h-full pb-6 relative">
-              <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none">
+              <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="xMidYMid slice">
                 <line x1="0" y1="0" x2="400" y2="0" stroke="currentColor" strokeWidth="0.3" className="text-default-300 dark:text-default-700" />
                 <line x1="0" y1="75" x2="400" y2="75" stroke="currentColor" strokeWidth="0.3" className="text-default-300 dark:text-default-700" />
                 <line x1="0" y1="150" x2="400" y2="150" stroke="currentColor" strokeWidth="0.3" className="text-default-300 dark:text-default-700" />

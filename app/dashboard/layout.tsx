@@ -7,6 +7,7 @@ import { Button } from "@heroui/button";
 import { VizionLogo } from "@/components/vizion-logo";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { getUser, signOut } from "@/app/actions/auth";
+import FuturisticDashboardLayout from "@/components/ui/FuturisticDashboardLayout";
 
 export default function DashboardLayout({
   children,
@@ -173,7 +174,7 @@ export default function DashboardLayout({
       <aside
         className={`${sidebarOpen ? "w-64" : "w-20"} bg-white dark:bg-black border-r border-divider transition-all duration-300 hidden md:flex md:flex-col`}
       >
-        <SidebarInner />
+        <FuturisticDashboardLayout children={undefined} />
       </aside>
 
       {/* Mobile overlay sidebar */}

@@ -79,7 +79,7 @@ export function FuturisticStrategyPieChart({ strategies }: FuturisticStrategyPie
   const holeRadius = 20;
 
   return (
-    <div className="min-h-[300px]">
+    <div className="min-h-[200px]">
       <div className="relative h-full rounded-2xl border border-gray-800/50 p-2 md:rounded-3xl md:p-3 overflow-hidden">
         {/* Grille de fond */}
         <div 

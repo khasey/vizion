@@ -17,6 +17,7 @@ import PerformanceOverview from "@/components/PerformanceOverview";
 import RecentTrades from "@/components/RecentTrades";
 import LongVsShort from "@/components/LongVsShort";
 import { FuturisticStrategyPieChart } from "@/components/ui/FuturisticStrategyPieChart";
+import { FuturisticLongShortBattle } from "@/components/ui/FuturisticLongShortBattle";
 
 export default function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<Trade[]>([]);
@@ -172,7 +173,7 @@ export default function DashboardPage() {
 
 
   return (
-    <>
+    <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6 mt-0 md:mt-0">
         <div>
@@ -201,80 +202,58 @@ export default function DashboardPage() {
       </header>
 
       {/* Dashboard Content */}
-      <div className="p-6 space-y-6">
-        {/* Performance Stats Cards */}
-        <PerformanceStats
-          totalPnL={totalPnL}
-          balanceChange={balanceChange}
-          totalTrades={totalTrades}
-          winRate={winRate}
-          winners={winners}
-          profitFactor={profitFactor}
-          maxDrawdown={maxDrawdown}
-          maxDrawdownValue={maxDrawdownValue}
-          avgRMultiple={avgRMultiple}
-          losers={losers}
-        />
+      <div className="flex-1 p-6 overflow-hidden">
+        <div className="h-full flex flex-col gap-4">
+          {/* Performance Stats Cards */}
+          <PerformanceStats
+            totalPnL={totalPnL}
+            balanceChange={balanceChange}
+            totalTrades={totalTrades}
+            winRate={winRate}
+            winners={winners}
+            profitFactor={profitFactor}
+            maxDrawdown={maxDrawdown}
+            maxDrawdownValue={maxDrawdownValue}
+            avgRMultiple={avgRMultiple}
+            losers={losers}
+          />
 
-        {/* Performance Overview + Recent Trades (left) / Distributions (right) */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Left column */}
-          <div className="xl:col-span-2 flex flex-col gap-6">
-            {/* Performance Overview */}
-            <PerformanceOverview
-              equityCurveData={equityCurveData}
-              maxValue={maxValue}
-              minValue={minValue}
-              range={range}
-              curveView={curveView}
-              setCurveView={setCurveView}
-            />
-            <LongVsShort />
-            {/* Recent Trades */}
-            {/* <RecentTrades recentTrades={recentTrades} loading={loading} /> */}
-            
-
-          </div>
-
-          {/* Right column */}
-          <div className="flex flex-col gap-6">
-            
-            <FuturisticStrategyPieChart
-              strategies={[
-                { name: "Breakout", count: 45, color: "#00ff88" },
-                { name: "Scalping", count: 32, color: "#ffd700" },
-                { name: "Swing", count: 28, color: "#ff3366" },
-                { name: "Range", count: 15, color: "#00d4ff" },
-              ]}
-            />
-
-            <div className="min-h-[300px]">
-              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
-                <div className="relative flex h-full flex-col gap-4 rounded-xl p-6 bg-white dark:bg-black">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h3 className="text-xl font-bold">By Direction</h3>
-                      <p className="text-sm text-default-600">Long vs Short</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 flex items-center justify-center min-h-[250px]">
-                    {allTrades.length === 0 ? (
-                      <div className="text-center text-default-600">
-                        <Icon icon="mdi:chart-pie" className="text-4xl mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No data to display</p>
-                      </div>
-                    ) : (
-                      <CircularRings />
-                    )}
-                  </div>
-                </div>
+          {/* Performance Overview + Recent Trades (left) / Distributions (right) */}
+          <div className="flex-1 grid grid-cols-1 xl:grid-cols-3">
+            {/* Left column */}
+            <div className="xl:col-span-2 flex flex-col pr-4 ">
+              {/* Performance Overview */}
+              <div className="flex-1">
+                <PerformanceOverview
+                  equityCurveData={equityCurveData}
+                  maxValue={maxValue}
+                  minValue={minValue}
+                  range={range}
+                  curveView={curveView}
+                  setCurveView={setCurveView}
+                />
               </div>
             </div>
-          </div>
-        </div>
 
+            {/* Right column */}
+            <div className="flex flex-col gap-4">
+              <FuturisticLongShortBattle
+                longCount={65}
+                shortCount={35}
+              />
+              <FuturisticStrategyPieChart
+                strategies={[
+                  { name: "Breakout", count: 45, color: "#00ff88" },
+                  { name: "Scalping", count: 32, color: "#ffd700" },
+                  { name: "Swing", count: 28, color: "#ff3366" },
+                  { name: "Range", count: 15, color: "#00d4ff" },
+                ]}
+              />
+            </div>
+          </div>
+
+        </div>
       </div>
-    </>
+    </div>
   );
 }

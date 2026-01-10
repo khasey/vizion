@@ -8,6 +8,7 @@ import { getTrades } from "@/app/actions/trades";
 import { TradesTable } from "@/components/trades/TradesTable";
 import type { Trade } from "@/types/trades";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { FuturisticCard } from "@/components/ui/FuturisticCard";
 
 export default function TradesPage() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -106,31 +107,13 @@ export default function TradesPage() {
               color: "text-danger",
             },
           ].map((stat, index) => (
-            <div key={index} className="min-h-[120px]">
-              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-5 bg-white dark:bg-black">
-                  <div className="w-fit rounded-lg border border-gray-600 p-2">
-                    <Icon
-                      icon={stat.icon}
-                      className={`text-xl ${stat.color}`}
-                    />
-                  </div>
-                  <div>
-                    <h3 className={`text-2xl font-bold mb-1 ${stat.color}`}>{stat.value}</h3>
-                    <p className="text-sm text-default-600">
-                      {stat.label}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <FuturisticCard
+              key={index}
+              title={stat.label}
+              value={stat.value}
+              icon={stat.icon}
+              isPositive={stat.color.includes('success') || stat.color.includes('primary')}
+            />
           ))}
         </div>
 

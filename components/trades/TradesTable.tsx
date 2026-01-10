@@ -186,7 +186,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
         style={{ maxHeight }}
       >
         <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-default-100 dark:bg-default-900 z-10">
+          <thead className="sticky top-0 bg-default-100  z-10">
             <tr>
               <th
                 className="px-3 py-3 text-left font-semibold cursor-pointer hover:bg-default-200 dark:hover:bg-default-800 transition-colors"
