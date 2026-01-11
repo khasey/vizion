@@ -5,6 +5,8 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Button } from "@heroui/button";
 import { useState } from "react";
 import { analyzeMacro, analyzeChart } from "@/app/actions/mistral";
+import { FuturCard } from "@/components/ui/FuturCard";
+import { FuturisticCard } from "@/components/ui/FuturisticCard";
 
 export default function InsightsPage() {
   const [activeTab, setActiveTab] = useState<"macro" | "chart">("macro");
@@ -130,15 +132,9 @@ export default function InsightsPage() {
       {activeTab === "macro" && (
         <div className="grid grid-cols-1 gap-6">
           {/* Instrument Selection */}
-          <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-            <GlowingEffect
-              spread={40}
-              glow={true}
-              disabled={false}
-              proximity={64}
-              inactiveZone={0.01}
-            />
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+          <FuturCard className="relative rounded-2xl p-2 md:rounded-3xl md:p-3">
+           
+            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-2 bg-white dark:bg-black border-divider">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-bold mb-1">
@@ -161,28 +157,22 @@ export default function InsightsPage() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {instruments.map((instrument) => (
-                  <Button
+                  <div
                     key={instrument.value}
-                    variant={
-                      selectedInstrument === instrument.value
-                        ? "solid"
-                        : "bordered"
-                    }
-                    color={
-                      selectedInstrument === instrument.value
-                        ? "primary"
-                        : "default"
-                    }
-                    onPress={() => setSelectedInstrument(instrument.value)}
-                    className="h-20 flex flex-col gap-1"
+                    onClick={() => setSelectedInstrument(instrument.value)}
+                    className="cursor-pointer"
                   >
-                    <Icon icon={instrument.icon} className="text-2xl" />
-                    <span className="text-xs">{instrument.label}</span>
-                  </Button>
+                    <FuturisticCard
+                      title={instrument.label}
+                      value=""
+                      icon={instrument.icon}
+                      isPositive={selectedInstrument === instrument.value}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
-          </div>
+          </FuturCard>
 
           {/* Analysis Result */}
           {macroAnalysis && (
@@ -249,7 +239,7 @@ export default function InsightsPage() {
       {activeTab === "chart" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Section */}
-          <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
+          <div className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
             <GlowingEffect
               spread={40}
               glow={true}
@@ -257,7 +247,7 @@ export default function InsightsPage() {
               proximity={64}
               inactiveZone={0.01}
             />
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black ">
               <div>
                 <h3 className="text-xl font-bold mb-1">
                   Uploader un graphique

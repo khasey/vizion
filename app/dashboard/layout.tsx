@@ -40,25 +40,25 @@ export default function DashboardLayout({
       title: "My Trades",
       icon: "mdi:chart-line",
       href: "/dashboard/trades",
-      color: "#00d4ff"
+      color: "#00ff88"
     },
     {
       title: "Curves",
       icon: "mdi:chart-multiline",
       href: "/dashboard/curves",
-      color: "#b366ff"
+      color: "#00ff88"
     },
     {
       title: "Trading Setups",
       icon: "mdi:strategy",
       href: "/dashboard/setups",
-      color: "#ffd700"
+      color: "#00ff88"
     },
     {
       title: "Calendar",
       icon: "mdi:calendar",
       href: "/dashboard/calendar",
-      color: "#ff6b35"
+      color: "#00ff88"
     },
     {
       title: "Insights IA",
@@ -120,7 +120,7 @@ export default function DashboardLayout({
                   className="absolute left-0 top-0 bottom-0 w-1 rounded-r-full transition-all duration-300"
                   style={{
                     backgroundColor: item.color,
-                    boxShadow: `0 0 10px ${item.color}, 0 0 20px ${item.color}40`
+                    // boxShadow: `0 0 10px ${item.color}, 0 0 20px ${item.color}40`
                   }}
                 />
               )}
@@ -135,7 +135,7 @@ export default function DashboardLayout({
                 }`}
                 style={{
                   ...(isActive && {
-                    background: `linear-gradient(90deg, ${item.color}15 0%, transparent 100%)`,
+                    // background: `linear-gradient(90deg, ${item.color}15 0%, transparent 100%)`,
                     borderLeft: `2px solid transparent`
                   })
                 }}

@@ -34,7 +34,7 @@ export default function SetupsPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Icon icon="mdi:strategy" className="text-2xl" />
@@ -122,7 +122,7 @@ export default function SetupsPage() {
                 proximity={64}
                 inactiveZone={0.01}
               />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
+              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6">
                 <SetupsLeaderboard strategies={strategyStats} />
               </div>
     

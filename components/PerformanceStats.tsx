@@ -44,7 +44,7 @@ export default function PerformanceStats({
 
       {/* Win Rate avec Gauge */}
      <div className="h-[200px]">
-    <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+    <div className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
       <FuturisticGlowingEffect
             spread={40}
             glow={true}
@@ -70,7 +70,7 @@ export default function PerformanceStats({
 
       {/* Profit Factor avec Gauge */}
       <div className="h-[200px]">
-        <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+        <div className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
           <FuturisticGlowingEffect
             spread={40}
             glow={true}
@@ -92,7 +92,7 @@ export default function PerformanceStats({
 
       {/* Discipline Score */}
       <div className="h-[200px]">
-        <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+        <div className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
           <FuturisticGlowingEffect
             spread={40}
             glow={true}
@@ -114,7 +114,7 @@ export default function PerformanceStats({
 
       {/* Consistency Score */}
       <div className="h-[200px]">
-        <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+        <div className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
           <FuturisticGlowingEffect
             spread={40}
             glow={true}

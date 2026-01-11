@@ -9,6 +9,7 @@ import { processCSVFile } from "@/lib/parsers/csvParser";
 import { uploadTrades } from "@/app/actions/trades";
 import { getUser } from "@/app/actions/auth";
 import type { Trade } from "@/types/trades";
+import { FuturCard } from "@/components/ui/FuturCard";
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);
@@ -135,7 +136,7 @@ export default function UploadPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Icon icon="mdi:cloud-upload" className="text-2xl" />
@@ -144,17 +145,6 @@ export default function UploadPage() {
           <p className="text-sm text-default-600">
             Upload CSV files from your broker
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            as={NextLink}
-            href="/dashboard"
-            variant="light"
-            size="sm"
-          >
-            <Icon icon="mdi:arrow-left" className="text-lg" />
-            Back to Dashboard
-          </Button>
         </div>
       </header>
 
@@ -165,15 +155,9 @@ export default function UploadPage() {
           {/* Upload Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Broker Selection */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <FuturCard className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
+            
+              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black ">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Icon icon="mdi:source-branch" className="text-xl" />
                   Sélectionner votre broker
@@ -181,7 +165,7 @@ export default function UploadPage() {
                 <select
                   value={selectedBroker}
                   onChange={(e) => setSelectedBroker(e.target.value)}
-                  className="px-4 py-3 rounded-lg border border-divider bg-white dark:bg-black text-sm font-semibold cursor-pointer hover:bg-default-50 dark:hover:bg-default-900 transition-colors"
+                  className="px-4 py-3 rounded-lg border border-divider bg-white dark:bg-black text-sm font-semibold cursor-pointer hover:bg-default-500 dark:hover:bg-default-100 transition-colors"
                 >
                   {brokers.map((broker) => (
                     <option key={broker.value} value={broker.value}>
@@ -193,18 +177,12 @@ export default function UploadPage() {
                   La détection automatique analysera le format de votre fichier CSV
                 </p>
               </div>
-            </div>
+            </FuturCard>
 
             {/* Drop Zone */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <FuturCard className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
+             
+              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-2 bg-white dark:bg-black">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Icon icon="mdi:file-upload" className="text-xl" />
                   Upload fichier CSV
@@ -214,7 +192,7 @@ export default function UploadPage() {
                   className={`relative border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center transition-all ${
                     dragActive
                       ? "border-primary bg-primary/10 scale-[1.02]"
-                      : "border-default-300 hover:border-primary/50 hover:bg-default-50 dark:hover:bg-default-900"
+                      : "border-default-300 hover:border-primary/50 hover:bg-default-50 dark:hover:bg-default-100"
                   }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -332,7 +310,7 @@ export default function UploadPage() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </FuturCard>
 
             {/* Parsed Trades Preview */}
             {parsedTrades && parsedTrades.length > 0 && (
@@ -445,73 +423,12 @@ export default function UploadPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Upload History */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Icon icon="mdi:history" className="text-xl" />
-                  Historique
-                </h3>
-                <div className="space-y-3">
-                  {uploadHistory.map((upload, idx) => (
-                    <div key={idx} className="p-3 rounded-lg border border-divider hover:bg-default-50 dark:hover:bg-default-900 transition-colors">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-semibold">{upload.broker}</p>
-                        <Icon icon="mdi:check-circle" className="text-success" />
-                      </div>
-                      <p className="text-xs text-default-600">{upload.trades} trades</p>
-                      <p className="text-xs text-default-500">{upload.date}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Supported Brokers */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Icon icon="mdi:check-decagram" className="text-xl" />
-                  Brokers supportés
-                </h3>
-                <div className="space-y-2">
-                  {brokers.slice(1).map((broker) => (
-                    <div key={broker.value} className="flex items-center gap-2 text-sm">
-                      <Icon icon={broker.icon} className="text-primary" />
-                      <span>{broker.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <Button size="sm" variant="bordered" className="w-full">
-                  <Icon icon="mdi:download" />
-                  Télécharger templates
-                </Button>
-              </div>
-            </div>
+            
 
             {/* Requirements */}
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+            <FuturCard className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
+              
+              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-2 bg-white dark:bg-black ">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Icon icon="mdi:information" className="text-xl" />
                   Format requis
@@ -534,7 +451,7 @@ export default function UploadPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </FuturCard>
           </div>
         </div>
       </div>

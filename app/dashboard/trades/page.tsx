@@ -80,7 +80,7 @@ export default function TradesPage() {
             {
               icon: "mdi:chart-box",
               label: "Total Trades",
-              value: stats.totalTrades,
+              value: stats.totalTrades.toString(),
               color: "text-primary",
             },
             {
@@ -98,13 +98,13 @@ export default function TradesPage() {
             {
               icon: "mdi:check-circle",
               label: "Winners",
-              value: stats.winners,
+              value: stats.winners.toString(),
               color: "text-success",
             },
             {
               icon: "mdi:close-circle",
               label: "Losers",
-              value: stats.losers,
+              value: stats.losers.toString(),
               color: "text-danger",
             },
           ].map((stat, index) => (

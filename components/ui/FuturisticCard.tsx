@@ -4,6 +4,7 @@ interface FuturisticPnLCardProps {
   title: string;
   value: string;
   change?: string;
+  subtext?: string;
   isPositive?: boolean;
   icon?: string;
 }
@@ -12,6 +13,7 @@ export function FuturisticCard({
   title,
   value,
   change,
+  subtext,
   isPositive = true,
   icon = "mdi:wallet"
 }: FuturisticPnLCardProps) {
@@ -147,6 +149,13 @@ export function FuturisticCard({
                 }}
               />
             </div>
+
+            {/* Subtext */}
+            {subtext && (
+              <div className="text-xs opacity-70" style={{ color: accentColor }}>
+                {subtext}
+              </div>
+            )}
           </div>
 
           {/* Coins décoratifs */}

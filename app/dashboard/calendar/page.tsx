@@ -8,6 +8,8 @@ import NextLink from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { getTrades } from "@/app/actions/trades";
 import type { Trade } from "@/types/trades";
+import { FuturisticCard } from "@/components/ui/FuturisticCard";
+import { FuturCard } from "@/components/ui/FuturCard";
 
 export default function CalendarPage() {
   const now = new Date();
@@ -95,17 +97,7 @@ export default function CalendarPage() {
             Track your daily trading performance
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            as={NextLink}
-            href="/dashboard"
-            variant="light"
-            size="sm"
-          >
-            <Icon icon="mdi:arrow-left" className="text-lg" />
-            Back to Dashboard
-          </Button>
-        </div>
+       
       </header>
 
       {/* Main Content */}
@@ -154,55 +146,21 @@ export default function CalendarPage() {
               positive: monthlyStats.tradingDays > 0 && (monthlyStats.totalPnL / monthlyStats.tradingDays) >= 0,
             },
           ].map((stat, index) => (
-            <div key={index} className="min-h-[120px]">
-              <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="relative flex h-full flex-col gap-3 overflow-hidden rounded-xl p-4 bg-white dark:bg-black border border-divider">
-                  <div className="flex items-center justify-between">
-                    <div className="w-fit rounded-lg border border-gray-600 p-2">
-                      <Icon
-                        icon={stat.icon}
-                        className="text-xl text-black dark:text-neutral-400"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className={`text-2xl font-bold mb-1 ${
-                      stat.positive === true
-                        ? "text-success"
-                        : stat.positive === false
-                          ? "text-danger"
-                          : ""
-                    }`}>
-                      {stat.value}
-                    </h3>
-                    <p className="text-sm text-default-600 mb-0.5">
-                      {stat.label}
-                    </p>
-                    <p className="text-xs text-default-500">{stat.subtext}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <FuturisticCard
+              key={index}
+              title={stat.label}
+              value={stat.value}
+              subtext={stat.subtext}
+              icon={stat.icon}
+              isPositive={stat.positive}
+            />
           ))}
         </div>
 
         {/* Calendar */}
-        <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
-            spread={40}
-            glow={true}
-            disabled={false}
-            proximity={64}
-            inactiveZone={0.01}
-          />
-          <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+        <FuturCard className="relative  rounded-2xl md:rounded-3xl md:p-3">
+          
+          <div className="relative flex flex-col p-2 overflow-hidden rounded-xl  bg-white dark:bg-black">
             <CalendarMonth 
               year={currentYear} 
               month={currentMonth}
@@ -213,53 +171,47 @@ export default function CalendarPage() {
               }}
             />
           </div>
-        </div>
+        </FuturCard>
 
         {/* Legend */}
-        <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
-            spread={40}
-            glow={true}
-            disabled={false}
-            proximity={64}
-            inactiveZone={0.01}
-          />
-          <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Icon icon="mdi:information" className="text-xl" />
+        <FuturCard className="relative rounded-2xl md:rounded-3xl md:p-3">
+         
+          <div className="relative flex flex-col gap-2 overflow-hidden rounded-xl p-3 bg-white dark:bg-black">
+            <h3 className="text-sm font-bold flex items-center gap-1">
+              <Icon icon="mdi:information" className="text-base" />
               Calendar Legend
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-success/10 border-2 border-success flex items-center justify-center">
-                  <Icon icon="mdi:trending-up" className="text-success text-xl" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-success/10 border-2 border-success flex items-center justify-center">
+                  <Icon icon="mdi:trending-up" className="text-base" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Profitable Day</p>
+                  <p className="font-semibold text-xs">Profitable Day</p>
                   <p className="text-xs text-default-600">Positive P&L</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-danger/10 border-2 border-danger flex items-center justify-center">
-                  <Icon icon="mdi:trending-down" className="text-danger text-xl" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-danger/10 border-2 border-danger flex items-center justify-center">
+                  <Icon icon="mdi:trending-down" className="text-base" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Loss Day</p>
+                  <p className="font-semibold text-xs">Loss Day</p>
                   <p className="text-xs text-default-600">Negative P&L</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-default-100 dark:bg-default-800 border-2 border-divider flex items-center justify-center">
-                  <Icon icon="mdi:minus" className="text-default-600 text-xl" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-default-100 dark:bg-default-800 border-2 border-divider flex items-center justify-center">
+                  <Icon icon="mdi:minus" className="text-default-600 text-base" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">No Trading</p>
+                  <p className="font-semibold text-xs">No Trading</p>
                   <p className="text-xs text-default-600">No trades recorded</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </FuturCard>
       </div>
     </>
   );

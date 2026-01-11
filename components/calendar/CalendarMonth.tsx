@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import CalendarJournal from "./CalendarJournal";
 import type { Trade } from "@/types/trades";
+import { FuturCard } from "../ui/FuturCard";
 
 function startOfMonth(year: number, month: number) {
   return new Date(year, month, 1);
@@ -132,9 +133,9 @@ export default function CalendarMonth({
           const dayTrades = tradesByDate[date] || [];
           const positive = sum.pnl > 0;
           return (
-            <div key={date} className={`rounded-lg p-2 border cursor-pointer flex flex-col justify-between ${isCurrentMonth ? "bg-white dark:bg-black" : "bg-default-100/60 dark:bg-default-900/60 opacity-50"} border-divider`} onClick={() => setSelectedDate(date)}>
+            <FuturCard key={date} className={`rounded-lg cursor-pointer flex flex-col justify-between ${isCurrentMonth ? "bg-white dark:bg-black" : "bg-default-100/60  opacity-50"}`}>
               <div className="flex items-center justify-between">
-                <div className="text-xs text-default-500">{d.getDate()}</div>
+                <div className="text-lg text-default-500">{d.getDate()}</div>
                 <div className={`text-xs font-semibold ${positive ? "text-success" : sum.pnl === 0 ? "text-default-500" : "text-danger"}`}>{sum.trades ? `${sum.trades} trades` : "—"}</div>
               </div>
               <div className="mt-2">
@@ -148,17 +149,10 @@ export default function CalendarMonth({
                   {dayTrades.length > 3 && <div className="text-xs text-default-500">+{dayTrades.length - 3} more</div>}
                 </div>
               </div>
-            </div>
+            </FuturCard>
           );
         })}
       </div>
-
-      {/* Day details */}
-      <CalendarJournal 
-        selectedDate={selectedDate} 
-        onClose={() => setSelectedDate(null)} 
-        trades={selectedDate ? (tradesByDate[selectedDate] || []) : []}
-      />
     </div>
   );
 }

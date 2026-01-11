@@ -20,7 +20,7 @@ export default function PerformanceOverview({
 }: PerformanceOverviewProps) {
   return (
     <div className="h-full">
-      <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+      <div className="relative h-full rounded-2xl p-2 md:rounded-3xl md:p-3">
         <FuturisticGlowingEffect
            spread={40}
           //  variant="green"

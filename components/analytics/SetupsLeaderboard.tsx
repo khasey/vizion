@@ -64,9 +64,9 @@ export function SetupsLeaderboard({ strategies }: { strategies: StrategyStats[] 
           <button onClick={() => setReverse(prev => !prev)} className="rounded-md px-2 py-1 border border-divider">{reverse ? "Desc" : "Asc"}</button>
         </div>
       </div>
-      <div className="bg-white dark:bg-black rounded-lg border border-divider overflow-hidden">
+      <div className=" dark:bg-black rounded-lg border border-divider overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-default-50 dark:bg-default-900">
+          <thead className="">
             <tr>
               <th className="text-left px-3 py-2">Setup</th>
               <th className="text-right px-3 py-2">Win %</th>
