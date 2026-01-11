@@ -15,7 +15,11 @@ function endOfMonth(year: number, month: number) {
 }
 
 function formatDate(d: Date) {
-  return d.toISOString().slice(0, 10);
+  // Use local timezone instead of UTC to avoid date shifting
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getCalendarStart(year: number, month: number) {
@@ -70,7 +74,9 @@ export default function CalendarMonth({
   const tradesByDate = useMemo(() => {
     const grouped: Record<string, Trade[]> = {};
     trades.forEach(trade => {
-      const dateKey = trade.trade_date.split('T')[0]; // YYYY-MM-DD
+      // Convert trade date to local timezone date string
+      const tradeDate = new Date(trade.trade_date);
+      const dateKey = formatDate(tradeDate);
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }

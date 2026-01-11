@@ -9,7 +9,9 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
       const text = e.target?.result as string;
       
       // Detect CSV format by checking the header
-      const firstLine = text.split('\n')[0];
+      const firstLine = text.split('\n')[0].trim();
+      
+      console.log('🔍 Analyzing CSV header:', firstLine);
       
       // Check if it's Deepchart format (semicolon-separated with specific columns)
       if (firstLine.includes('Symbol;DT;Quantity;Entry;Exit;ProfitLoss')) {
@@ -19,6 +21,7 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
           header: true,
           delimiter: ';',
           skipEmptyLines: true,
+          transformHeader: (header) => header.trim(), // Remove whitespace from headers
           complete: (results) => {
             console.log('🔍 Deepchart parse results:', results.data.length);
             
@@ -29,7 +32,16 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
             
             // Convert Deepchart format to standard CSVRow format
             const convertedRows = results.data
-              .filter((row: any) => row.Symbol && row.DT && row.Entry && row.Exit)
+              .filter((row: any) => {
+                // Filter out empty rows or invalid data
+                const hasSymbol = row.Symbol && row.Symbol.trim() !== '';
+                const hasDate = row.DT && row.DT.trim() !== '';
+                const hasQuantity = row.Quantity && row.Quantity.toString().trim() !== '';
+                const hasEntry = row.Entry && row.Entry.toString().trim() !== '';
+                const hasExit = row.Exit && row.Exit.toString().trim() !== '';
+                
+                return hasSymbol && hasDate && hasQuantity && hasEntry && hasExit;
+              })
               .map((row: any) => {
                 const quantity = parseFloat(row.Quantity) || 0;
                 const entryPrice = parseFloat(row.Entry) || 0;
@@ -39,24 +51,34 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
                 // Determine side from quantity sign (negative = short, positive = long)
                 const isLong = quantity > 0;
                 
+                // Generate a unique order number
+                const timestamp = new Date(row.DT).getTime();
+                const orderNumber = `DC-${row.Symbol}-${timestamp}-${Math.random().toString(36).substr(2, 9)}`;
+                
+                console.log(`📊 Converting Deepchart row: ${row.Symbol} ${isLong ? 'LONG' : 'SHORT'} ${Math.abs(quantity)} @ ${entryPrice} → ${exitPrice} = $${profitLoss}`);
+                
                 return {
-                  Symbol: row.Symbol,
+                  Symbol: row.Symbol.trim(),
                   'Buy/Sell': isLong ? 'B' : 'S',
                   'Qty Filled': Math.abs(quantity).toString(),
                   'Avg Fill Price': entryPrice.toString(),
                   Status: 'Filled',
                   'Create Time (RST)': row.DT,
                   'Update Time (RST)': row.DT,
-                  'Order Number': `DC-${row.Symbol}-${row.DT}-${Math.random().toString(36).substr(2, 9)}`,
+                  'Order Number': orderNumber,
                   _deepchartData: {
                     exitPrice,
                     profitLoss,
                     isMatched: true,
+                    originalQuantity: quantity,
                   }
                 };
               });
             
             console.log('✅ Converted Deepchart rows:', convertedRows.length);
+            if (convertedRows.length > 0) {
+              console.log('📄 Sample converted row:', convertedRows[0]);
+            }
             resolve(convertedRows);
           },
           error: (error: Error) => {
@@ -68,11 +90,13 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
       }
       
       // Original format: Find the "Completed Orders" section
+      console.log('📋 Attempting to parse standard broker CSV format');
       const lines = text.split('\n');
       const completedOrdersLineIndex = lines.findIndex(line => line.includes('Completed Orders'));
       
       if (completedOrdersLineIndex === -1) {
         console.error('❌ "Completed Orders" section not found in CSV');
+        console.log('💡 This might be an unsupported CSV format');
         resolve([]);
         return;
       }
@@ -85,7 +109,7 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
-          console.log('🔍 Papa parse results:', results.data.length);
+          console.log('🔍 Standard CSV parse results:', results.data.length);
           
           // Debug: log first row and its keys
           if (results.data.length > 0) {
@@ -113,7 +137,7 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
           resolve(validRows);
         },
         error: (error: Error) => {
-          console.error('❌ Papa parse error:', error);
+          console.error('❌ Standard CSV parse error:', error);
           reject(error);
         },
       });
@@ -154,6 +178,9 @@ export function parseTradeRow(row: CSVRow): ParsedTrade | null {
     return null;
   }
 
+  // Check if this is a Deepchart trade (pre-matched)
+  const deepchartData = (row as any)._deepchartData;
+
   return {
     symbol: row.Symbol,
     side,
@@ -162,6 +189,7 @@ export function parseTradeRow(row: CSVRow): ParsedTrade | null {
     timestamp,
     orderNumber: row['Order Number'],
     status: row.Status,
+    ...(deepchartData && { _deepchartData: deepchartData })
   };
 }
 
@@ -178,12 +206,17 @@ export function matchTrades(parsedTrades: ParsedTrade[]): TradeMatch[] {
     for (const entry of deepchartTrades) {
       const deepchartData = (entry as any)._deepchartData;
       
+      // Create the exit trade with the opposite side
       const exit: ParsedTrade = {
         ...entry,
         side: entry.side === 'buy' ? 'sell' : 'buy',
         price: deepchartData.exitPrice,
-        timestamp: entry.timestamp, // Same timestamp as entry for Deepchart
+        timestamp: entry.timestamp, // Same date, but exit would be later in time
+        orderNumber: `${entry.orderNumber}-EXIT`,
+        status: 'Filled'
       };
+      
+      console.log(`✅ Matched Deepchart trade: ${entry.symbol} ${entry.side.toUpperCase()} ${entry.quantity} @ ${entry.price} → ${exit.price} = $${deepchartData.profitLoss}`);
       
       matches.push({
         entry,
@@ -193,10 +226,13 @@ export function matchTrades(parsedTrades: ParsedTrade[]): TradeMatch[] {
       });
     }
     
+    console.log(`🎉 Successfully matched ${matches.length} Deepchart trades`);
     return matches;
   }
   
   // Original matching logic for non-Deepchart trades
+  console.log('📊 Using FIFO matching for standard broker trades');
+  
   // Sort all trades by timestamp (oldest first)
   const sortedTrades = [...parsedTrades].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -264,6 +300,7 @@ export function matchTrades(parsedTrades: ParsedTrade[]): TradeMatch[] {
     }
   }
 
+  console.log(`✅ Matched ${matches.length} trades using FIFO`);
   return matches;
 }
 
@@ -294,8 +331,16 @@ export async function processCSVFile(
   file: File,
   userId: string
 ): Promise<Trade[]> {
+  console.log('📁 Processing CSV file:', file.name);
+  
   const rows = await parseCSV(file);
   console.log('📊 Total CSV rows:', rows.length);
+  
+  if (rows.length === 0) {
+    console.warn('⚠️ No valid rows found in CSV');
+    return [];
+  }
+  
   console.log('📋 First row sample:', rows[0]);
   
   const parsedTrades = rows
@@ -303,7 +348,13 @@ export async function processCSVFile(
     .filter((trade): trade is ParsedTrade => trade !== null);
 
   console.log('✅ Parsed filled orders:', parsedTrades.length);
-  console.log('🔍 Sample trades:', parsedTrades.slice(0, 5));
+  
+  if (parsedTrades.length === 0) {
+    console.warn('⚠️ No valid trades found after parsing');
+    return [];
+  }
+  
+  console.log('🔍 Sample trades:', parsedTrades.slice(0, 3));
   
   // Group by symbol and side for debugging
   const bySymbol = parsedTrades.reduce((acc, t) => {
@@ -318,9 +369,11 @@ export async function processCSVFile(
   
   if (matches.length === 0 && parsedTrades.length > 0) {
     console.warn('⚠️ No matches found! Check if quantities and symbols match exactly');
+    console.log('💡 For Deepchart format, ensure the CSV has the correct headers');
   }
   
   const trades = matches.map((match) => convertToTrade(match, userId, file.name));
 
+  console.log('🎉 Successfully processed', trades.length, 'trades');
   return trades;
 }

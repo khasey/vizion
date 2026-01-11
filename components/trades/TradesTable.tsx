@@ -252,7 +252,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
             {filteredTrades.map((trade) => (
               <tr
                 key={trade.id}
-                className="border-t border-divider hover:bg-default-50 dark:hover:bg-default-900 transition-colors"
+                className="border-t border-divider transition-colors"
               >
                 <td className="px-3 py-3 whitespace-nowrap">
                   {formatDate(trade.trade_date)}
@@ -283,7 +283,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
                       value={trade.strategy_id || "none"}
                       onChange={(e) => handleStrategyChange(trade.id!, e.target.value)}
                       disabled={updatingTradeId === trade.id}
-                      className={`w-full px-2 py-1 rounded text-xs border border-divider bg-white dark:bg-black disabled:opacity-50 hover:bg-default-50 dark:hover:bg-default-900 transition-colors ${
+                      className={`w-full px-2 py-1 rounded text-xs border border-divider bg-white dark:bg-black disabled:opacity-50  transition-colors ${
                         trade.strategy_id ? "pl-3" : ""
                       }`}
                     >

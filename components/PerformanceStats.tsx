@@ -35,9 +35,9 @@ export default function PerformanceStats({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 h-[200px]">
           <FuturisticPnLCard
             title="PnL RÉALISÉ"
-            value="$1,234.56"
-            change="+12.5%"
-            isPositive={true}
+            value={`${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}€`}
+            change={balanceChange}
+            isPositive={totalPnL >= 0}
             icon="mdi:wallet"
           />
 
@@ -56,9 +56,9 @@ export default function PerformanceStats({
       <div className=" h-[190px] flex flex-col justify-center items-center overflow-hidden">
             <FuturisticGauge
             
-            value={65.5}
-            winners={131}
-            totalTrades={200}
+            value={parseFloat(winRate)}
+            winners={winners}
+            totalTrades={totalTrades}
             label="WIN RATE"
             showStats={true}
           />

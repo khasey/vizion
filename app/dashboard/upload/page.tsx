@@ -154,30 +154,6 @@ export default function UploadPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Upload Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Broker Selection */}
-            <FuturCard className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
-            
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black ">
-                <h3 className="text-lg font-bold flex items-center gap-2">
-                  <Icon icon="mdi:source-branch" className="text-xl" />
-                  Sélectionner votre broker
-                </h3>
-                <select
-                  value={selectedBroker}
-                  onChange={(e) => setSelectedBroker(e.target.value)}
-                  className="px-4 py-3 rounded-lg border border-divider bg-white dark:bg-black text-sm font-semibold cursor-pointer hover:bg-default-500 dark:hover:bg-default-100 transition-colors"
-                >
-                  {brokers.map((broker) => (
-                    <option key={broker.value} value={broker.value}>
-                      {broker.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-default-600">
-                  La détection automatique analysera le format de votre fichier CSV
-                </p>
-              </div>
-            </FuturCard>
 
             {/* Drop Zone */}
             <FuturCard className="relative rounded-2xl  p-2 md:rounded-3xl md:p-3">
@@ -314,15 +290,9 @@ export default function UploadPage() {
 
             {/* Parsed Trades Preview */}
             {parsedTrades && parsedTrades.length > 0 && (
-              <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
+              <FuturCard className="relative rounded-2xl p-2 md:rounded-3xl md:p-3">
+              
+                <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                   <h3 className="text-lg font-bold flex items-center gap-2">
                     <Icon icon="mdi:table-eye" className="text-xl" />
                     Trades détectés ({parsedTrades.length})
@@ -330,7 +300,7 @@ export default function UploadPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="font-semibold bg-default-100 dark:bg-default-800">
+                        <tr className="font-semibold">
                           <th className="px-3 py-2 border border-divider text-left">Symbol</th>
                           <th className="px-3 py-2 border border-divider text-left">Side</th>
                           <th className="px-3 py-2 border border-divider text-right">Entry</th>
@@ -342,7 +312,7 @@ export default function UploadPage() {
                       </thead>
                       <tbody>
                         {parsedTrades.slice(0, 10).map((trade, i) => (
-                          <tr key={i} className="hover:bg-default-50 dark:hover:bg-default-900">
+                          <tr key={i} className="">
                             <td className="px-3 py-2 border border-divider font-mono">{trade.symbol}</td>
                             <td className="px-3 py-2 border border-divider">
                               <span className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -379,45 +349,8 @@ export default function UploadPage() {
                     Affichage des {Math.min(10, parsedTrades.length)} premiers trades sur {parsedTrades.length} détectés
                   </p>
                 </div>
-              </div>
-            )}
-
-            {/* CSV Preview */}
-            {csvPreview && (
-              <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black border border-divider">
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <Icon icon="mdi:file-eye" className="text-xl" />
-                    Aperçu du fichier brut
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs">
-                      <tbody>
-                        {csvPreview.map((row, i) => (
-                          <tr key={i} className={i === 0 ? "font-semibold bg-default-100 dark:bg-default-800" : "hover:bg-default-50 dark:hover:bg-default-900"}>
-                            {row.slice(0, 8).map((cell, j) => (
-                              <td key={j} className="px-2 py-1 border border-divider truncate max-w-[120px]">
-                                {cell}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <p className="text-xs text-default-600">
-                    Premières lignes du fichier CSV
-                  </p>
-                </div>
-              </div>
-            )}
+              </FuturCard>
+            )}          
           </div>
 
           {/* Sidebar */}

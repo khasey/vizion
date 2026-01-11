@@ -43,13 +43,14 @@ export default function CalendarPage() {
     const tradesByDay: Record<string, Trade[]> = {};
     allTrades.forEach(trade => {
       const tradeDate = new Date(trade.trade_date);
-      if (tradeDate.getFullYear() === currentYear && tradeDate.getMonth() === currentMonth) {
-        const dateKey = trade.trade_date.split('T')[0]; // YYYY-MM-DD
-        if (!tradesByDay[dateKey]) {
-          tradesByDay[dateKey] = [];
-        }
-        tradesByDay[dateKey].push(trade);
+      const year = tradeDate.getFullYear();
+      const month = tradeDate.getMonth();
+      const day = tradeDate.getDate();
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      if (!tradesByDay[dateKey]) {
+        tradesByDay[dateKey] = [];
       }
+      tradesByDay[dateKey].push(trade);
     });
 
     // Calculate stats for each day

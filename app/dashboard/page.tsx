@@ -51,6 +51,7 @@ export default function DashboardPage() {
   // Calculate statistics from real trades
   const STARTING_BALANCE = 0;
   const totalPnL = allTrades.reduce((sum, trade) => sum + trade.profit_loss, 0);
+  console.log('Total P&L calculation:', { totalPnL, tradeCount: allTrades.length, trades: allTrades.map(t => ({ id: t.id, pnl: t.profit_loss })) });
   const currentBalance = STARTING_BALANCE + totalPnL;
   const balanceChange = totalPnL >= 0 ? `+${totalPnL.toFixed(0)}` : totalPnL.toFixed(0);
   
@@ -139,14 +140,6 @@ export default function DashboardPage() {
     return acc;
   }, {} as Record<string, { total: number; winners: number; losers: number; pnl: number }>);
 
-  const pieChartData = Object.entries(setupDistribution).map(([name, data]) => ({
-    name,
-    value: data.total,
-    winners: data.winners,
-    losers: data.losers,
-    pnl: data.pnl,
-  }));
-
   // Prepare data for Direction Distribution (Long/Short)
   const directionDistribution = allTrades.reduce((acc, trade) => {
     const direction = (trade.side === 'long' || trade.side === 'buy') ? 'Long' : 'Short';
@@ -171,36 +164,32 @@ export default function DashboardPage() {
     pnl: data.pnl,
   }));
 
+  // Prepare strategy data for pie chart
+  const strategyChartData = Object.entries(setupDistribution).map(([name, data], index) => {
+    // Assign colors based on index
+    const colors = ['#00ff88', '#ffd700', '#ff3366', '#00d4ff', '#b366ff', '#ff6b35'];
+    return {
+      name,
+      count: data.total,
+      color: colors[index % colors.length],
+      winners: data.winners,
+      losers: data.losers,
+      pnl: data.pnl,
+    };
+  });
 
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6 mt-0 md:mt-0">
         <div>
-        <h2 className="text-2xl font-bold text-gray-100  bg-clip-text ">
-          Master Your Trading Edge
-        </h2>
-        <p className="text-sm text-gray-400 font-mono">
-          Transform data into decisions. Turn insights into profits.
-        </p>
-      </div>
-        {/* <div className="flex items-center gap-3">
-          <Button
-            as={NextLink}
-            href="/dashboard/trades/new"
-            color="primary"
-            size="sm"
-          >
-            <Icon icon="mdi:plus" className="text-lg" />
-            New Trade
-          </Button>
-          <Button isIconOnly variant="light">
-            <Icon icon="mdi:bell" className="text-xl" />
-          </Button>
-          <Button isIconOnly variant="light">
-            <Icon icon="mdi:cog" className="text-xl" />
-          </Button>
-        </div> */}
+          <h2 className="text-2xl font-bold text-gray-100  bg-clip-text ">
+            Master Your Trading Edge
+          </h2>
+          <p className="text-sm text-gray-400 font-mono">
+            Transform data into decisions. Turn insights into profits.
+          </p>
+        </div>
       </header>
 
       {/* Dashboard Content */}
@@ -221,9 +210,9 @@ export default function DashboardPage() {
           />
 
           {/* Performance Overview + Recent Trades (left) / Distributions (right) */}
-          <div className="flex-1 grid grid-cols-1 xl:grid-cols-3">
+          <div className="flex-1 grid grid-cols-1 xl:grid-cols-3 gap-4">
             {/* Left column */}
-            <div className="xl:col-span-2 flex flex-col pr-4 ">
+            <div className="xl:col-span-2 flex flex-col">
               {/* Performance Overview */}
               <div className="flex-1">
                 <PerformanceOverview
@@ -239,18 +228,26 @@ export default function DashboardPage() {
 
             {/* Right column */}
             <div className="flex flex-col gap-4">
+              {/* Long vs Short Battle with REAL data */}
               <FuturisticLongShortBattle
-                longCount={65}
-                shortCount={35}
+                longCount={directionDistribution['Long']?.total || 0}
+                shortCount={directionDistribution['Short']?.total || 0}
               />
-              <FuturisticStrategyPieChart
-                strategies={[
-                  { name: "Breakout", count: 45, color: "#00ff88" },
-                  { name: "Scalping", count: 32, color: "#ffd700" },
-                  { name: "Swing", count: 28, color: "#ff3366" },
-                  { name: "Range", count: 15, color: "#00d4ff" },
-                ]}
-              />
+              
+              {/* Strategy Distribution with REAL data */}
+              {strategyChartData.length > 0 ? (
+                <FuturisticStrategyPieChart
+                  strategies={strategyChartData}
+                />
+              ) : (
+                <div className="min-h-[300px] rounded-2xl border border-gray-800/50 p-4 bg-black/40 backdrop-blur-xl flex items-center justify-center">
+                  <div className="text-center">
+                    <Icon icon="mdi:chart-pie" className="text-4xl text-gray-600 mx-auto mb-2" />
+                    <p className="text-gray-400 font-mono text-sm">NO STRATEGY DATA</p>
+                    <p className="text-gray-500 text-xs mt-1">Add strategies to your trades</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
