@@ -85,7 +85,7 @@ export default function CalendarPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Icon icon="mdi:calendar-month" className="text-2xl" />

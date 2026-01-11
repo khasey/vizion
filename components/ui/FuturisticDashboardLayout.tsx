@@ -209,7 +209,7 @@ export default function FuturisticDashboardLayout({
         </div>
         
         {/* Theme Switcher */}
-        <div 
+        {/* <div 
           className={`flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-800/30 transition-colors ${
             !sidebarOpen ? "justify-center" : ""
           }`}
@@ -218,7 +218,7 @@ export default function FuturisticDashboardLayout({
           {sidebarOpen && (
             <span className="text-sm font-mono text-gray-400">Theme</span>
           )}
-        </div>
+        </div> */}
       </nav>
 
       {/* User Profile & Settings */}

@@ -9,6 +9,7 @@ import { TradesTable } from "@/components/trades/TradesTable";
 import type { Trade } from "@/types/trades";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { FuturisticCard } from "@/components/ui/FuturisticCard";
+import { FuturCard } from "@/components/ui/FuturCard";
 
 export default function TradesPage() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -39,7 +40,7 @@ export default function TradesPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Icon icon="mdi:chart-line" className="text-2xl" />
@@ -118,14 +119,9 @@ export default function TradesPage() {
         </div>
 
         {/* Trades Table */}
-        <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
-            spread={40}
-            glow={true}
-            disabled={false}
-            proximity={64}
-            inactiveZone={0.01}
-          />
+        <FuturCard >
+
+          
           <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold">All Trades</h3>
@@ -139,7 +135,8 @@ export default function TradesPage() {
               <TradesTable trades={trades} showActions={true} maxHeight="calc(100vh - 450px)" onTradeUpdate={fetchTrades} />
             )}
           </div>
-        </div>
+          </FuturCard>
+
       </div>
     </>
   );

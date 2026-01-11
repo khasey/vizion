@@ -11,6 +11,7 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Button } from "@heroui/button";
 import NextLink from "next/link";
 import { FuturisticCard } from "@/components/ui/FuturisticCard";
+import { FuturCard } from "@/components/ui/FuturCard";
 
 export default function SetupsPage() {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
@@ -33,7 +34,7 @@ export default function SetupsPage() {
   return (
     <>
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50flex items-center justify-between px-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Icon icon="mdi:strategy" className="text-2xl" />
@@ -43,17 +44,7 @@ export default function SetupsPage() {
             Configure and analyze your trading strategies
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            as={NextLink}
-            href="/dashboard"
-            variant="light"
-            size="sm"
-          >
-            <Icon icon="mdi:arrow-left" className="text-lg" />
-            Back to Dashboard
-          </Button>
-        </div>
+        
       </header>
 
       {/* Main Content */}
@@ -106,8 +97,8 @@ export default function SetupsPage() {
         {/* Setup Manager & Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Setup Manager */}
-          <div className="min-h-[500px]">
-            <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+          <FuturCard  className="max-h-[350px]">
+
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -118,12 +109,12 @@ export default function SetupsPage() {
               <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <SetupsManager onChange={() => fetchStrategyStats()} />
               </div>
-            </div>
-          </div>
+
+          </FuturCard>
 
           {/* Setup Performance Leaderboard */}
-          <div className="min-h-[500px]">
-            <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
+          <FuturCard  className="max-h-[350px]">
+           
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -134,22 +125,16 @@ export default function SetupsPage() {
               <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
                 <SetupsLeaderboard strategies={strategyStats} />
               </div>
-            </div>
-          </div>
+    
+          </FuturCard>
         </div>
 
         {/* Setup Performance Cards */}
         {strategyStats.length > 0 && (
           <div>
-            <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
+            <FuturCard  >
+             
+              <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 ">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold">Setup Performance</h3>
                   <p className="text-sm text-default-600">
@@ -160,7 +145,7 @@ export default function SetupsPage() {
                   {strategyStats.map((strategy) => (
                     <div
                       key={strategy.id}
-                      className="rounded-lg p-4 bg-default-50 dark:bg-default-900/50 hover:bg-default-100 dark:hover:bg-default-900 transition-colors"
+                      className="rounded-lg p-4 bg-gray-100 dark:bg-gray-900/40 hover:bg-gray-200 dark:hover:bg-gray-800/60 transition-colors border border-gray-200 dark:border-gray-800"
                     >
                       <div className="flex items-start gap-3 mb-3">
                         <div
@@ -168,46 +153,46 @@ export default function SetupsPage() {
                           style={{ backgroundColor: strategy.color }}
                         />
                         <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-1">
+                          <h4 className="font-semibold text-lg mb-1 text-gray-900 dark:text-gray-100">
                             {strategy.name}
                           </h4>
                           {strategy.description && (
-                            <p className="text-xs text-default-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {strategy.description}
                             </p>
                           )}
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
-                          <p className="text-xs text-default-600 mb-1">
+                        <div className="bg-gray-200 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-300 dark:border-gray-700/50">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                             Trades
                           </p>
-                          <p className="text-lg font-bold">{strategy.total_trades}</p>
+                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{strategy.total_trades}</p>
                         </div>
-                        <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
-                          <p className="text-xs text-default-600 mb-1">
+                        <div className="bg-gray-200 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-300 dark:border-gray-700/50">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                             Win Rate
                           </p>
-                          <p className="text-lg font-bold text-success">
+                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
                             {strategy.win_rate.toFixed(0)}%
                           </p>
                         </div>
-                        <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
-                          <p className="text-xs text-default-600 mb-1">
+                        <div className="bg-gray-200 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-300 dark:border-gray-700/50">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                             Avg R/R
                           </p>
-                          <p className="text-lg font-bold">{strategy.avg_rr.toFixed(1)}R</p>
+                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{strategy.avg_rr.toFixed(1)}R</p>
                         </div>
-                        <div className="bg-default-100 dark:bg-default-800 rounded-lg p-3">
-                          <p className="text-xs text-default-600 mb-1">
+                        <div className="bg-gray-200 dark:bg-gray-800/80 rounded-lg p-3 border border-gray-300 dark:border-gray-700/50">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
                             Total P&L
                           </p>
                           <p
                             className={`text-lg font-bold ${
                               strategy.total_pnl >= 0
-                                ? "text-success"
-                                : "text-danger"
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
                             }`}
                           >
                             ${strategy.total_pnl >= 0 ? "+" : ""}
@@ -219,25 +204,10 @@ export default function SetupsPage() {
                   ))}
                 </div>
               </div>
-            </div>
+            </FuturCard >
           </div>
         )}
 
-        {/* Time of Day Heatmap */}
-        <div>
-          <div className="relative rounded-2xl border p-2 md:rounded-3xl md:p-3">
-            <GlowingEffect
-              spread={40}
-              glow={true}
-              disabled={false}
-              proximity={64}
-              inactiveZone={0.01}
-            />
-            <div className="relative flex flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
-              <TimeOfDayHeatmap setups={strategies} />
-            </div>
-          </div>
-        </div>
 
         {/* Empty State */}
         {!loading && strategyStats.length === 0 && (

@@ -105,7 +105,7 @@ export default function InsightsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 p-1 rounded-lg border border-divider bg-white dark:bg-black w-fit">
+      <div className="flex gap-2 p-1 rounded-lg border border-gray-800/50 bg-white dark:bg-black w-fit">
         <Button
           size="sm"
           variant={activeTab === "macro" ? "solid" : "light"}

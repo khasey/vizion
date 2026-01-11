@@ -175,14 +175,16 @@ export default function DashboardPage() {
   return (
     <div className="h-screen flex flex-col">
       {/* Header */}
-      <header className="h-16 bg-white dark:bg-black border-b border-divider flex items-center justify-between px-6 mt-0 md:mt-0">
+      <header className="h-16 bg-white dark:bg-black border-b border-gray-800/50 flex items-center justify-between px-6 mt-0 md:mt-0">
         <div>
-          <h2 className="text-2xl font-bold">Trading Journal</h2>
-          <p className="text-sm text-default-600">
-            Track, analyze, and improve your trading performance
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+        <h2 className="text-2xl font-bold text-gray-100  bg-clip-text ">
+          Master Your Trading Edge
+        </h2>
+        <p className="text-sm text-gray-400 font-mono">
+          Transform data into decisions. Turn insights into profits.
+        </p>
+      </div>
+        {/* <div className="flex items-center gap-3">
           <Button
             as={NextLink}
             href="/dashboard/trades/new"
@@ -198,7 +200,7 @@ export default function DashboardPage() {
           <Button isIconOnly variant="light">
             <Icon icon="mdi:cog" className="text-xl" />
           </Button>
-        </div>
+        </div> */}
       </header>
 
       {/* Dashboard Content */}

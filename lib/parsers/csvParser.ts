@@ -8,7 +8,66 @@ export function parseCSV(file: File): Promise<CSVRow[]> {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       
-      // Find the "Completed Orders" section
+      // Detect CSV format by checking the header
+      const firstLine = text.split('\n')[0];
+      
+      // Check if it's Deepchart format (semicolon-separated with specific columns)
+      if (firstLine.includes('Symbol;DT;Quantity;Entry;Exit;ProfitLoss')) {
+        console.log('🎯 Detected Deepchart CSV format');
+        
+        Papa.parse<any>(text, {
+          header: true,
+          delimiter: ';',
+          skipEmptyLines: true,
+          complete: (results) => {
+            console.log('🔍 Deepchart parse results:', results.data.length);
+            
+            if (results.data.length > 0) {
+              console.log('🔑 Column names found:', Object.keys(results.data[0]));
+              console.log('📄 First row sample:', results.data[0]);
+            }
+            
+            // Convert Deepchart format to standard CSVRow format
+            const convertedRows = results.data
+              .filter((row: any) => row.Symbol && row.DT && row.Entry && row.Exit)
+              .map((row: any) => {
+                const quantity = parseFloat(row.Quantity) || 0;
+                const entryPrice = parseFloat(row.Entry) || 0;
+                const exitPrice = parseFloat(row.Exit) || 0;
+                const profitLoss = parseFloat(row.ProfitLoss) || 0;
+                
+                // Determine side from quantity sign (negative = short, positive = long)
+                const isLong = quantity > 0;
+                
+                return {
+                  Symbol: row.Symbol,
+                  'Buy/Sell': isLong ? 'B' : 'S',
+                  'Qty Filled': Math.abs(quantity).toString(),
+                  'Avg Fill Price': entryPrice.toString(),
+                  Status: 'Filled',
+                  'Create Time (RST)': row.DT,
+                  'Update Time (RST)': row.DT,
+                  'Order Number': `DC-${row.Symbol}-${row.DT}-${Math.random().toString(36).substr(2, 9)}`,
+                  _deepchartData: {
+                    exitPrice,
+                    profitLoss,
+                    isMatched: true,
+                  }
+                };
+              });
+            
+            console.log('✅ Converted Deepchart rows:', convertedRows.length);
+            resolve(convertedRows);
+          },
+          error: (error: Error) => {
+            console.error('❌ Deepchart parse error:', error);
+            reject(error);
+          },
+        });
+        return;
+      }
+      
+      // Original format: Find the "Completed Orders" section
       const lines = text.split('\n');
       const completedOrdersLineIndex = lines.findIndex(line => line.includes('Completed Orders'));
       
@@ -109,6 +168,35 @@ export function parseTradeRow(row: CSVRow): ParsedTrade | null {
 export function matchTrades(parsedTrades: ParsedTrade[]): TradeMatch[] {
   const matches: TradeMatch[] = [];
   
+  // Check if trades are already matched (from Deepchart)
+  const deepchartTrades = parsedTrades.filter((t: any) => t._deepchartData?.isMatched);
+  
+  if (deepchartTrades.length > 0) {
+    console.log('🎯 Processing pre-matched Deepchart trades:', deepchartTrades.length);
+    
+    // For Deepchart, trades are already matched, create exit trades
+    for (const entry of deepchartTrades) {
+      const deepchartData = (entry as any)._deepchartData;
+      
+      const exit: ParsedTrade = {
+        ...entry,
+        side: entry.side === 'buy' ? 'sell' : 'buy',
+        price: deepchartData.exitPrice,
+        timestamp: entry.timestamp, // Same timestamp as entry for Deepchart
+      };
+      
+      matches.push({
+        entry,
+        exit,
+        profit_loss: deepchartData.profitLoss,
+        duration_minutes: 0, // Deepchart doesn't provide duration
+      });
+    }
+    
+    return matches;
+  }
+  
+  // Original matching logic for non-Deepchart trades
   // Sort all trades by timestamp (oldest first)
   const sortedTrades = [...parsedTrades].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()

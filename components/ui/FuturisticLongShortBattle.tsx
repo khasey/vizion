@@ -111,8 +111,8 @@ export function FuturisticLongShortBattle({ longCount, shortCount }: FuturisticL
                   </div>
                   {/* Pulsing ring */}
                   <div 
-                    className="absolute inset-0 rounded-full border-2 border-[#00ff88] animate-ping"
-                    style={{ animationDuration: '2s' }}
+                    className="absolute inset-0 rounded-full border-2 border-cyan-500 animate-ping"
+                    style={{ animationDuration: '3s' }}
                   />
                 </div>
               </div>
@@ -133,7 +133,7 @@ export function FuturisticLongShortBattle({ longCount, shortCount }: FuturisticL
               </div>
 
               {/* Central dividing line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/20" />
+              {/* <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/20" /> */}
 
               {/* Lightning effects at collision point */}
               {mounted && (
@@ -206,12 +206,7 @@ export function FuturisticLongShortBattle({ longCount, shortCount }: FuturisticL
               </div>
             </div>
           </div>
-
-          {/* Coins décoratifs */}
-          <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-[#00ff88]/30" />
-          <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-[#00ff88]/30" />
-          <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-[#00ff88]/30" />
-          <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-[#00ff88]/30" />
+         
         </div>
       </div>
 

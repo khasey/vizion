@@ -21,6 +21,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FuturisticGlowingEffect } from "@/components/ui/FuturisticGlowingEffect";
+import { FuturCard } from "@/components/ui/FuturCard";
 
 export default function CurvesPage() {
   const [timeRange, setTimeRange] = useState("day");
@@ -288,7 +289,7 @@ export default function CurvesPage() {
               : `Showing ${filteredTrades.length} of ${trades.length} trades`}
           </p>
         </div>
-        <div className="flex items-center gap-2 p-1 rounded-lg border border-divider bg-white dark:bg-black">
+        <div className="flex items-center gap-2 p-1 rounded-lg border border-gray-800/50 bg-white dark:bg-black">
           {timeRanges.map((range) => (
             <Button
               key={range.value}
@@ -335,15 +336,7 @@ export default function CurvesPage() {
 
       {/* Equity Curve */}
       <div className="min-h-[400px]">
-        <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-           <FuturisticGlowingEffect
-           spread={40}
-           variant="red"
-   glow={true}
-   disabled={false}
-   proximity={64}
-  inactiveZone={0.01}
-/>
+        <FuturCard className="relative h-full rounded-2xl p-2 md:rounded-3xl md:p-3">
           <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
@@ -413,21 +406,15 @@ export default function CurvesPage() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </FuturCard>
       </div>
 
       {/* PnL & Drawdown Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily PnL */}
         <div className="min-h-[400px]">
-          <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-            <GlowingEffect
-              spread={40}
-              glow={true}
-              disabled={false}
-              proximity={64}
-              inactiveZone={0.01}
-            />
+          <FuturCard className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
+          
             <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">
@@ -465,19 +452,13 @@ export default function CurvesPage() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </FuturCard>
         </div>
 
         {/* Drawdown */}
         <div className="min-h-[400px]">
-          <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-            <GlowingEffect
-              spread={40}
-              glow={true}
-              disabled={false}
-              proximity={64}
-              inactiveZone={0.01}
-            />
+          <FuturCard className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
+     
             <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-fit rounded-lg border border-gray-600 p-2">
@@ -529,20 +510,14 @@ export default function CurvesPage() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </FuturCard>
         </div>
       </div>
 
       {/* Win/Loss Ratio */}
       <div className="min-h-[400px]">
-        <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
-            spread={40}
-            glow={true}
-            disabled={false}
-            proximity={64}
-            inactiveZone={0.01}
-          />
+        <FuturCard className="relative h-full rounded-2xl  p-2 md:rounded-3xl md:p-3">
+
           <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
@@ -598,7 +573,7 @@ export default function CurvesPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </FuturCard>
       </div>
       </>
       )}

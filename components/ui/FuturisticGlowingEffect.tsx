@@ -181,17 +181,12 @@ const FuturisticGlowingEffect = memo(
 
     return (
       <>
+        {/* Bordure statique TOUJOURS visible en fond - même style que les cards */}
         <div
-          className={cn(
-            "pointer-events-none absolute -inset-px hidden rounded-[inherit] border opacity-0 transition-opacity",
-            glow && "opacity-100",
-            variant === "green" && "border-[#00ff88]",
-            variant === "cyan" && "border-[#00d4ff]",
-            variant === "red" && "border-[#ff3366]",
-            variant === "default" && "border-[#00ff88]",
-            disabled && "!block"
-          )}
+          className="pointer-events-none absolute -inset-[0.5px] rounded-[inherit] border border-gray-800/50"
         />
+        
+        {/* Animation de la bordure avec la souris PAR-DESSUS */}
         <div
           ref={containerRef}
           style={

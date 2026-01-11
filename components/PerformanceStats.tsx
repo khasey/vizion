@@ -4,6 +4,7 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Gauge } from "@/components/ui/gauge";
 import { FuturisticGauge } from "./ui/FuturisticGauge";
 import { FuturisticPnLCard } from "./ui/FuturisticPnlCard";
+import { FuturisticGlowingEffect } from "./ui/FuturisticGlowingEffect";
 
 interface PerformanceStatsProps {
   totalPnL: number;
@@ -44,15 +45,15 @@ export default function PerformanceStats({
       {/* Win Rate avec Gauge */}
      <div className="h-[200px]">
     <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-      <GlowingEffect
-        spread={40}
-        glow={true}
-        disabled={false}
-        proximity={64}
-        inactiveZone={0.01}
-      />
+      <FuturisticGlowingEffect
+            spread={40}
+            glow={true}
+            disabled={false}
+            proximity={64}
+            inactiveZone={0.01}
+          />
       
-      <div className=" h-[190px] flex justify-center items-center overflow-hidden pb-2">
+      <div className=" h-[190px] flex flex-col justify-center items-center overflow-hidden">
             <FuturisticGauge
             
             value={65.5}
@@ -61,14 +62,16 @@ export default function PerformanceStats({
             label="WIN RATE"
             showStats={true}
           />
+                <p className="absolute bottom-5 text-xs font-semibold text-center text-default-600">Percentage of winning trades</p>
       </div>
+
     </div>
   </div>
 
       {/* Profit Factor avec Gauge */}
       <div className="h-[200px]">
         <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
+          <FuturisticGlowingEffect
             spread={40}
             glow={true}
             disabled={false}
@@ -82,6 +85,7 @@ export default function PerformanceStats({
               label="PROFIT FACTOR"
               showStats={false}
             />
+             <p className="absolute bottom-5 text-xs font-semibold text-center text-default-600">Ratio of total profits to total losses</p>
           </div>
         </div>
       </div>
@@ -89,7 +93,7 @@ export default function PerformanceStats({
       {/* Discipline Score */}
       <div className="h-[200px]">
         <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
+          <FuturisticGlowingEffect
             spread={40}
             glow={true}
             disabled={false}
@@ -103,6 +107,7 @@ export default function PerformanceStats({
               label="DISCIPLINE SCORE"
               showStats={false}
             />
+             <p className="absolute bottom-5 text-xs font-semibold text-center text-default-600">Measure of trading discipline and rule adherence</p>
           </div>
         </div>
       </div>
@@ -110,7 +115,7 @@ export default function PerformanceStats({
       {/* Consistency Score */}
       <div className="h-[200px]">
         <div className="relative h-full rounded-2xl border p-2 md:rounded-3xl md:p-3">
-          <GlowingEffect
+          <FuturisticGlowingEffect
             spread={40}
             glow={true}
             disabled={false}
@@ -124,6 +129,7 @@ export default function PerformanceStats({
               label="CONSISTENCY SCORE"
               showStats={false}
             />
+             <p className="absolute bottom-5 text-xs font-semibold text-center text-default-600">Measure of performance consistency over time</p>
           </div>
         </div>
       </div>
