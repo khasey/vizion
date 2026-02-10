@@ -115,7 +115,7 @@ export function SetupsManager({ onChange }: { onChange?: () => void }) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-default-600">{strategies.length}</span>
           <button
-            className={`rounded-md px-3 py-1.5 text-sm font-medium border border-divider bg-white dark:bg-black hover:bg-default-50 disabled:opacity-60`}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium border border-divider bg-white dark:bg-black hover:bg-default-50 disabled:opacity-60 cursor-pointer`}
             onClick={startNew}
             disabled={loading}
           >
@@ -176,10 +176,10 @@ export function SetupsManager({ onChange }: { onChange?: () => void }) {
             </div>
           </div>
           <div className="mt-3 flex items-center gap-2">
-            <button className="px-3 py-1.5 bg-primary text-white rounded-md" onClick={save}>
+            <button className="px-3 py-1.5 bg-success text-white rounded-md cursor-pointer hover:bg-success/80 transition-colors" onClick={save}>
               Save
             </button>
-            <button className="px-3 py-1.5 rounded-md border border-divider" onClick={cancelEdit}>
+            <button className="px-3 py-1.5 rounded-md border border-divider cursor-pointer hover:bg-default-100 transition-colors" onClick={cancelEdit}>
               Cancel
             </button>
           </div>
@@ -190,7 +190,7 @@ export function SetupsManager({ onChange }: { onChange?: () => void }) {
           {presets.map(p => (
             <button
               key={p.name}
-              className="rounded-md p-2 text-sm border border-divider flex items-center gap-2 hover:bg-default-50"
+              className="rounded-md p-2 text-sm border border-divider flex items-center gap-2 hover:bg-default-50 cursor-pointer"
               onClick={() => {
                 setEditing({ name: p.name, color: p.color, description: "", user_id: "" });
                 setName(p.name);
