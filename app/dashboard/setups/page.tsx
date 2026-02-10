@@ -97,7 +97,7 @@ export default function SetupsPage() {
         {/* Setup Manager & Performance */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Setup Manager */}
-          <FuturCard  className="max-h-[350px]">
+          <FuturCard>
 
               <GlowingEffect
                 spread={40}
@@ -106,7 +106,7 @@ export default function SetupsPage() {
                 proximity={64}
                 inactiveZone={0.01}
               />
-              <div className="relative flex h-full flex-col gap-4 overflow-hidden rounded-xl p-6 bg-white dark:bg-black">
+              <div className="relative flex h-full flex-col gap-4 overflow-auto rounded-xl p-6 bg-white dark:bg-black">
                 <SetupsManager onChange={() => fetchStrategyStats()} />
               </div>
 

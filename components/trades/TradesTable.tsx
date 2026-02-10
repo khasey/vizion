@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect } from "react";
 import type { Trade } from "@/types/trades";
 import type { Strategy } from "@/types/strategies";
 import { getStrategies } from "@/app/actions/strategies";
-import { updateTradeStrategy } from "@/app/actions/trades";
+import { updateTradeStrategy, deleteTrade } from "@/app/actions/trades";
 
 interface TradesTableProps {
   trades: Trade[];
@@ -21,6 +21,7 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
   const [filterStrategy, setFilterStrategy] = useState<string>("all");
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [updatingTradeId, setUpdatingTradeId] = useState<string | null>(null);
+  const [deletingTradeId, setDeletingTradeId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchStrategies() {
@@ -39,6 +40,20 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
     
     if (result.error) {
       console.error("Error updating strategy:", result.error);
+    } else if (onTradeUpdate) {
+      onTradeUpdate();
+    }
+  }
+
+  async function handleDeleteTrade(tradeId: string) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce trade ?")) return;
+    
+    setDeletingTradeId(tradeId);
+    const result = await deleteTrade(tradeId);
+    setDeletingTradeId(null);
+    
+    if (result.error) {
+      console.error("Error deleting trade:", result.error);
     } else if (onTradeUpdate) {
       onTradeUpdate();
     }
@@ -246,6 +261,9 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
               </th>
               <th className="px-3 py-3 text-center font-semibold">Duration</th>
               <th className="px-3 py-3 text-left font-semibold">Time</th>
+              {showActions && (
+                <th className="px-3 py-3 text-center font-semibold">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -317,6 +335,22 @@ export function TradesTable({ trades, showActions = false, maxHeight = "600px", 
                 <td className="px-3 py-3 text-xs text-default-600">
                   {formatTime(trade.entry_time)} → {formatTime(trade.exit_time)}
                 </td>
+                {showActions && (
+                  <td className="px-3 py-3 text-center">
+                    <button
+                      onClick={() => handleDeleteTrade(trade.id!)}
+                      disabled={deletingTradeId === trade.id}
+                      className="p-1.5 rounded-lg text-default-400 hover:text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 cursor-pointer"
+                      title="Supprimer ce trade"
+                    >
+                      {deletingTradeId === trade.id ? (
+                        <Icon icon="mdi:loading" className="text-lg animate-spin" />
+                      ) : (
+                        <Icon icon="mdi:trash-can-outline" className="text-lg" />
+                      )}
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

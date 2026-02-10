@@ -135,11 +135,15 @@ export function SetupsManager({ onChange }: { onChange?: () => void }) {
                 <div className="flex items-center justify-between mb-1">
                   <div className="font-semibold">{s.name}</div>
                   <div className="flex items-center gap-2">
-                    <button className="text-default-600 hover:text-primary text-sm" onClick={() => startEdit(s)}>
+                    <button className="text-default-600 hover:text-primary text-sm cursor-pointer" onClick={() => startEdit(s)}>
                       Edit
                     </button>
-                    <button className="text-default-600 hover:text-destructive text-sm" onClick={() => s.id && remove(s.id)}>
-                      Delete
+                    <button 
+                      className="p-1 rounded-lg text-default-400 hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer" 
+                      onClick={() => s.id && remove(s.id)}
+                      title="Supprimer ce setup"
+                    >
+                      <Icon icon="mdi:trash-can-outline" className="text-lg" />
                     </button>
                   </div>
                 </div>

@@ -91,22 +91,14 @@ export default function DashboardPage() {
   const avgLoss = losers > 0 ? totalLosses / losers : 0;
   const avgRMultiple = avgLoss > 0 ? (avgWin / avgLoss).toFixed(1) : "0.0";
 
-  // Generate equity curve and PnL curve from last 20 trades
-  const last20Trades = [...allTrades]
-    .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
-    .slice(-20);
+  // Generate equity curve and PnL curve from all trades
+  const sortedTrades = [...allTrades]
+    .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime());
   
-  const equityCurveData = last20Trades.length > 0 
+  const equityCurveData = sortedTrades.length > 0 
     ? (() => {
         let balance = 0;
-        // Calculate starting balance for the last 20 trades
-        const tradesBeforeLast20 = [...allTrades]
-          .sort((a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime())
-          .slice(0, -20);
-        
-        balance += tradesBeforeLast20.reduce((sum, t) => sum + t.profit_loss, 0);
-        
-        return last20Trades.map((trade, index) => {
+        return sortedTrades.map((trade, index) => {
           const tradePnL = trade.profit_loss;
           balance += tradePnL;
           return { day: index + 1, equity: balance, pnl: tradePnL };
@@ -222,6 +214,7 @@ export default function DashboardPage() {
                   range={range}
                   curveView={curveView}
                   setCurveView={setCurveView}
+                  tradeCount={allTrades.length}
                 />
               </div>
             </div>

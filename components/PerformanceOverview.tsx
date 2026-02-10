@@ -8,6 +8,7 @@ interface PerformanceOverviewProps {
   range: number;
   curveView: 'equity' | 'pnl' | 'both';
   setCurveView: (view: 'equity' | 'pnl' | 'both') => void;
+  tradeCount?: number;
 }
 
 export default function PerformanceOverview({
@@ -17,6 +18,7 @@ export default function PerformanceOverview({
   range,
   curveView,
   setCurveView,
+  tradeCount,
 }: PerformanceOverviewProps) {
   return (
     <div className="h-full">
@@ -33,7 +35,7 @@ export default function PerformanceOverview({
           <div className="flex items-center justify-between mb-1">
             <div>
               <h3 className="text-lg font-bold">Performance Overview</h3>
-              <p className="text-xs text-default-600">Last 20 trades</p>
+              <p className="text-xs text-default-600">{tradeCount ? `${tradeCount} trade${tradeCount > 1 ? 's' : ''}` : 'No trades yet'}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 bg-default-100 dark:bg-default-50/10 rounded-lg p-0.5">
@@ -220,9 +222,9 @@ export default function PerformanceOverview({
               </svg>
             </div>
             <div className="absolute bottom-0 left-12 right-0 flex justify-between text-[10px] text-default-600">
-              <span>Day 1</span>
-              <span>Day 10</span>
-              <span>Day 20</span>
+              <span>Trade 1</span>
+              <span>Trade {Math.ceil((tradeCount || equityCurveData.length) / 2)}</span>
+              <span>Trade {tradeCount || equityCurveData.length}</span>
             </div>
           </div>
         </div>
